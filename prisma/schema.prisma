@@ -1,0 +1,99 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model CourseEnrollment {
+  id       Int    @id @default(autoincrement())
+  userId   Int
+  courseId Int
+  user     User   @relation(fields: [userId], references: [id])
+  course   Course @relation(fields: [courseId], references: [id])
+
+  @@unique([userId, courseId])
+}
+
+model Area {
+  id     Int      @id @default(autoincrement())
+  area   String   @unique
+  course Course[]
+}
+
+model Course {
+  id          Int                @id @default(autoincrement())
+  title       String
+  description String
+  owner       User               @relation(fields: [ownerId], references: [id])
+  ownerId     Int
+  owner_name  String
+  section     String
+  subject     String
+  area        Area               @relation(fields: [areaId], references: [id])
+  areaId      Int
+  users       CourseEnrollment[]
+  token       String             @unique
+  activities  Activities[]
+}
+
+model Gender {
+  id     Int    @id @default(autoincrement())
+  gender String @unique
+  users  User[]
+}
+
+model User {
+  id              Int                @id @default(autoincrement())
+  email           String             @unique
+  password        String
+  create_date     DateTime           @default(now())
+  user_name       String             @unique
+  gender          Gender             @relation(fields: [genderId], references: [id])
+  genderId        Int
+  name            String
+  last_name       String
+  phone           String
+  courses         CourseEnrollment[]
+  course_owner    Course[]
+  activities_sent ActivitiesSent[]
+}
+
+model Activities {
+  id              Int              @id @default(autoincrement())
+  course          Course           @relation(fields: [course_id], references: [id])
+  course_id       Int
+  title           String
+  description     String
+  grade           Decimal
+  start_date      String
+  end_date        String
+  email           String
+  digital         Boolean          @default(true)
+  status          Status           @relation(fields: [status_id], references: [id])
+  status_id       Int
+  activities_send ActivitiesSent[]
+}
+
+model ActivitiesSent {
+  id           Int        @id @default(autoincrement())
+  activity     Activities @relation(fields: [activity_id], references: [id])
+  activity_id  Int
+  user         User       @relation(fields: [user_id], references: [id])
+  user_id      Int
+  cap_activity Bytes
+  create_date  DateTime   @default(now())
+}
+
+model Status {
+  id         Int          @id @default(autoincrement())
+  status     String       @unique
+  activities Activities[]
+}
