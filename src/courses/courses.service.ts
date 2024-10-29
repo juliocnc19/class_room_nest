@@ -7,7 +7,7 @@ import { Prisma, Course, User } from '@prisma/client';
 export class CoursesService implements Courses {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(course: Prisma.CourseCreateInput): Promise<Course> {
+  async create(course: Course): Promise<Course> {
     return await this.prisma.course.create({ data: course });
   }
 
@@ -33,14 +33,39 @@ export class CoursesService implements Courses {
   async findUserOfCourse(
     course_id: Prisma.CourseWhereUniqueInput,
   ): Promise<Course> {
-    return await this.prisma.course.findUnique({ where: course_id });
+    return await this.prisma.course.findUnique({
+      where: course_id,
+      include: {
+        users: {
+          include: {
+            user: true,
+          },
+        },
+        area: {
+          select: {
+            area: true,
+          },
+        },
+      },
+    });
   }
 
   async joinToCourse(id: number, token: string): Promise<Course> {
-    return await this.prisma.course.update({
-      where: { id },
-      data: { token },
+    const course = await this.prisma.course.findUnique({
+      where: {
+        token,
+      },
     });
+    const jointed = await this.prisma.courseEnrollment.create({
+      data: {
+        userId: id,
+        courseId: course.id,
+      },
+    });
+
+    if (jointed) return course;
+
+    return null;
   }
 
   async delteUserOfCourse(idUser: number, idCourse: number): Promise<User> {

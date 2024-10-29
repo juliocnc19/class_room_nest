@@ -86,6 +86,7 @@ model ActivitiesSent {
   id           Int        @id @default(autoincrement())
   activity     Activities @relation(fields: [activity_id], references: [id])
   activity_id  Int
+  document     String     @default("")
   user         User       @relation(fields: [user_id], references: [id])
   user_id      Int
   cap_activity Bytes

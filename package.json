@@ -21,9 +21,11 @@
     "seed": "node src/seed.mjs"
   },
   "dependencies": {
+    "@fastify/static": "^7.0.4",
     "@nestjs/common": "^10.0.0",
     "@nestjs/core": "^10.0.0",
     "@nestjs/platform-express": "^10.0.0",
+    "@nestjs/platform-fastify": "^10.4.6",
     "@nestjs/swagger": "^7.4.2",
     "@prisma/client": "^5.21.1",
     "class-transformer": "^0.5.1",
