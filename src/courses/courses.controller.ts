@@ -10,7 +10,9 @@ import {
 } from '@nestjs/common';
 import { CoursesService } from './courses.service';
 import { Course, Prisma } from '@prisma/client';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('courses')
 @Controller('courses')
 export class CoursesController {
   constructor(private readonly coursesService: CoursesService) {}
