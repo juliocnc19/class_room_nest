@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Activitiy } from './activities.interface';
-import { Activities, Prisma } from '@prisma/client';
+import { Activities, ActivitiesSent, Prisma } from '@prisma/client';
 
 @Injectable()
 export class ActivitiesService implements Activitiy {
@@ -46,6 +46,24 @@ export class ActivitiesService implements Activitiy {
             title: true,
           },
         },
+      },
+    });
+  }
+
+  async myActivitiesSent(id_user: number): Promise<ActivitiesSent[]> {
+    return await this.prismaService.activitiesSent.findMany({
+      where: {
+        user_id: id_user,
+      },
+    });
+  }
+
+  async activitiesForEvaluation(
+    id_activity: number,
+  ): Promise<ActivitiesSent[]> {
+    return await this.prismaService.activitiesSent.findMany({
+      where: {
+        activity_id: id_activity,
       },
     });
   }

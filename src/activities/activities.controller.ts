@@ -46,4 +46,16 @@ export class ActivitiesController {
   async myActivities(@Param('id_user', ParseIntPipe) idUser: number) {
     return await this.activitiesService.myActivities(idUser);
   }
+
+  @Get('mine/sent/:id_user')
+  async myActivitiesSent(@Param('id_user', ParseIntPipe) id_user: number) {
+    return await this.activitiesService.myActivitiesSent(id_user);
+  }
+
+  @Get('for/evaluation/:id_activity')
+  async activitiesForEvaluation(
+    @Param('id_activity', ParseIntPipe) id_activity: number,
+  ) {
+    return await this.activitiesService.activitiesForEvaluation(id_activity);
+  }
 }

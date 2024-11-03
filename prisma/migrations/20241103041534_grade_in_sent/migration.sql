@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE "ActivitiesSent" ADD COLUMN     "grade" DECIMAL(65,30) NOT NULL DEFAULT 0,
+ALTER COLUMN "document" DROP NOT NULL;
+
+-- AlterTable
+ALTER TABLE "QuizzSent" ADD COLUMN     "grade" DECIMAL(65,30) NOT NULL DEFAULT 0;

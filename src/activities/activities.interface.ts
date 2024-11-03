@@ -1,4 +1,4 @@
-import { Activities, Prisma } from '@prisma/client';
+import { Activities, ActivitiesSent, Prisma } from '@prisma/client';
 
 export interface Activitiy {
   create(activitiy: Prisma.ActivitiesCreateInput): Promise<Activities>;
@@ -7,4 +7,6 @@ export interface Activitiy {
   delete(id: number): Promise<Activities>;
   update(activities: Activities): Promise<Activities>;
   myActivities(idUser: number): Promise<Activities[]>;
+  myActivitiesSent(id_user: number): Promise<ActivitiesSent[]>;
+  activitiesForEvaluation(id_activity: number): Promise<ActivitiesSent[]>;
 }
