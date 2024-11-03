@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Post, Body } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { User } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('users')
@@ -9,7 +9,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post('/create')
-  async create(@Body() userCreateInput: User) {
+  async create(@Body() userCreateInput: Prisma.UserCreateInput) {
     return await this.usersService.create(userCreateInput);
   }
 

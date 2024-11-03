@@ -1,7 +1,7 @@
 import { Course, User, Prisma } from '@prisma/client';
 
 export interface Courses {
-  create(course: Course): Promise<Course>;
+  create(course: Prisma.CourseCreateInput): Promise<Course>;
   findOne(id: Prisma.CourseWhereUniqueInput): Promise<Course | null>;
   findMany(ownerId: number): Promise<Array<Course>>;
   delete(id: Prisma.CourseWhereUniqueInput): Promise<Course>;

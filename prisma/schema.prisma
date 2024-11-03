@@ -64,6 +64,7 @@ model User {
   courses         CourseEnrollment[]
   course_owner    Course[]
   activities_sent ActivitiesSent[]
+  QuizzSent       QuizzSent[]
 }
 
 model Activities {
@@ -80,17 +81,50 @@ model Activities {
   status          Status           @relation(fields: [status_id], references: [id])
   status_id       Int
   activities_send ActivitiesSent[]
+  quizz           Quizz[]
 }
 
 model ActivitiesSent {
-  id           Int        @id @default(autoincrement())
-  activity     Activities @relation(fields: [activity_id], references: [id])
-  activity_id  Int
-  document     String     @default("")
-  user         User       @relation(fields: [user_id], references: [id])
-  user_id      Int
-  cap_activity Bytes
-  create_date  DateTime   @default(now())
+  id          Int        @id @default(autoincrement())
+  activity    Activities @relation(fields: [activity_id], references: [id])
+  activity_id Int
+  document    String     @default("")
+  user        User       @relation(fields: [user_id], references: [id])
+  user_id     Int
+  create_date DateTime   @default(now())
+}
+
+model Quizz {
+  id          Int         @id @default(autoincrement())
+  activity    Activities  @relation(fields: [activity_id], references: [id])
+  activity_id Int
+  question    Questions[]
+  sent        QuizzSent[]
+}
+
+model Questions {
+  id      Int      @id @default(autoincrement())
+  Quizz   Quizz?   @relation(fields: [quizzId], references: [id])
+  quizzId Int?
+  text    String
+  options Option[]
+  answer  Int
+}
+
+model Option {
+  id         Int       @id @default(autoincrement())
+  text       String
+  question   Questions @relation(fields: [questionId], references: [id])
+  questionId Int
+}
+
+model QuizzSent {
+  id          Int      @id @default(autoincrement())
+  quizz       Quizz    @relation(fields: [quizzId], references: [id])
+  quizzId     Int
+  user        User     @relation(fields: [userId], references: [id])
+  userId      Int
+  create_date DateTime @default(now())
 }
 
 model Status {

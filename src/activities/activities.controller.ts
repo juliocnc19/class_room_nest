@@ -9,7 +9,7 @@ import {
   Delete,
 } from '@nestjs/common';
 import { ActivitiesService } from './activities.service';
-import { Activities } from '@prisma/client';
+import { Activities, Prisma } from '@prisma/client';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Activities')
@@ -18,7 +18,7 @@ export class ActivitiesController {
   constructor(private readonly activitiesService: ActivitiesService) {}
 
   @Post()
-  async create(@Body() activitiy: Activities) {
+  async create(@Body() activitiy: Prisma.ActivitiesCreateInput) {
     return await this.activitiesService.create(activitiy);
   }
 

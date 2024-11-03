@@ -11,6 +11,7 @@ import {
 import { CoursesService } from './courses.service';
 import { Course, Prisma } from '@prisma/client';
 import { ApiTags } from '@nestjs/swagger';
+import { nanoid } from 'nanoid';
 
 @ApiTags('courses')
 @Controller('courses')
@@ -18,7 +19,8 @@ export class CoursesController {
   constructor(private readonly coursesService: CoursesService) {}
 
   @Post()
-  async create(@Body() course: Course) {
+  async create(@Body() course: Prisma.CourseCreateInput) {
+    course.token = nanoid();
     return await this.coursesService.create(course);
   }
 

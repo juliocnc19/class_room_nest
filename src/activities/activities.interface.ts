@@ -1,7 +1,7 @@
 import { Activities, Prisma } from '@prisma/client';
 
 export interface Activitiy {
-  create(activitiy: Activities): Promise<Activities>;
+  create(activitiy: Prisma.ActivitiesCreateInput): Promise<Activities>;
   findOne(id: number): Promise<Activities | null>;
   findMany(course_id: number): Promise<Activities[] | []>;
   delete(id: number): Promise<Activities>;

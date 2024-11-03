@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Activitiy } from './activities.interface';
-import { Activities } from '@prisma/client';
+import { Activities, Prisma } from '@prisma/client';
 
 @Injectable()
 export class ActivitiesService implements Activitiy {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async create(activitiy: Activities): Promise<Activities> {
+  async create(activitiy: Prisma.ActivitiesCreateInput): Promise<Activities> {
     return this.prismaService.activities.create({ data: activitiy });
   }
 

@@ -7,7 +7,7 @@ import { Prisma, Course, User } from '@prisma/client';
 export class CoursesService implements Courses {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(course: Course): Promise<Course> {
+  async create(course: Prisma.CourseCreateInput): Promise<Course> {
     return await this.prisma.course.create({ data: course });
   }
 
