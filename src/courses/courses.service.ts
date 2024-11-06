@@ -2,39 +2,51 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Courses } from './courses.interface';
 import { Prisma, Course, User } from '@prisma/client';
+import {
+  CreateCourseDto,
+  DeleteCourseDto,
+  FindManyCourseDto,
+  FindOneCourseDto,
+  JoinUserCourseDto,
+  UpdateCourseDto,
+} from './dto/courses.dto';
 
 @Injectable()
 export class CoursesService implements Courses {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(course: Prisma.CourseCreateInput): Promise<Course> {
-    return await this.prisma.course.create({ data: course });
+  async create(createCourseDto: CreateCourseDto): Promise<Course> {
+    return await this.prisma.course.create({ data: createCourseDto });
   }
 
-  async findOne(id: Prisma.CourseWhereUniqueInput): Promise<Course | null> {
-    return await this.prisma.course.findUnique({ where: id });
-  }
-
-  async findMany(ownerId: number): Promise<Array<Course>> {
-    return await this.prisma.course.findMany({ where: { ownerId } });
-  }
-
-  async delete(id: Prisma.CourseWhereUniqueInput): Promise<Course> {
-    return await this.prisma.course.delete({ where: id });
-  }
-
-  async update(id: number, course: Prisma.CourseUpdateInput): Promise<Course> {
-    return await this.prisma.course.update({
-      where: { id },
-      data: course,
+  async findOne(findOneCourseDto: FindOneCourseDto): Promise<Course | null> {
+    return await this.prisma.course.findUnique({
+      where: { id: findOneCourseDto.id },
     });
   }
 
-  async findUserOfCourse(
-    course_id: Prisma.CourseWhereUniqueInput,
-  ): Promise<Course> {
+  async findMany(findManyCourseDto: FindManyCourseDto): Promise<Array<Course>> {
+    return await this.prisma.course.findMany({
+      where: { ownerId: findManyCourseDto.ownerId },
+    });
+  }
+
+  async delete(deleteCourseId: FindOneCourseDto): Promise<Course> {
+    return await this.prisma.course.delete({
+      where: { id: deleteCourseId.id },
+    });
+  }
+
+  async update(updateCourseDto: UpdateCourseDto): Promise<Course> {
+    return await this.prisma.course.update({
+      where: { id: updateCourseDto.id },
+      data: updateCourseDto,
+    });
+  }
+
+  async findUserOfCourse(findOneCourseDto: FindOneCourseDto): Promise<Course> {
     return await this.prisma.course.findUnique({
-      where: course_id,
+      where: { id: findOneCourseDto.id },
       include: {
         users: {
           include: {
@@ -50,15 +62,15 @@ export class CoursesService implements Courses {
     });
   }
 
-  async joinToCourse(id: number, token: string): Promise<Course> {
+  async joinToCourse(joinUserCourseDto: JoinUserCourseDto): Promise<Course> {
     const course = await this.prisma.course.findUnique({
       where: {
-        token,
+        token: joinUserCourseDto.token,
       },
     });
     const jointed = await this.prisma.courseEnrollment.create({
       data: {
-        userId: id,
+        userId: joinUserCourseDto.id,
         courseId: course.id,
       },
     });
@@ -68,10 +80,10 @@ export class CoursesService implements Courses {
     return null;
   }
 
-  async delteUserOfCourse(idUser: number, idCourse: number): Promise<User> {
+  async delteUserOfCourse(deleteCourseDto: DeleteCourseDto): Promise<User> {
     return await this.prisma.user.update({
-      where: { id: idUser },
-      data: { courses: { disconnect: [{ id: idCourse }] } },
+      where: { id: deleteCourseDto.idUser },
+      data: { courses: { disconnect: [{ id: deleteCourseDto.idCourse }] } },
     });
   }
 }
