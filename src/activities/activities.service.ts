@@ -2,10 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Activitiy } from './activities.interface';
 import { Activities, ActivitiesSent, Prisma } from '@prisma/client';
+import { CloudService } from 'src/cloud/cloud.service';
 
 @Injectable()
 export class ActivitiesService implements Activitiy {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly cloudService: CloudService,
+  ) {}
 
   async create(activitiy: Prisma.ActivitiesCreateInput): Promise<Activities> {
     return this.prismaService.activities.create({ data: activitiy });
@@ -50,10 +54,18 @@ export class ActivitiesService implements Activitiy {
     });
   }
 
-  async myActivitiesSent(id_user: number): Promise<ActivitiesSent[]> {
-    return await this.prismaService.activitiesSent.findMany({
+  async myActivitiesSent(id_user: number): Promise<Activities[]> {
+    return await this.prismaService.activities.findMany({
       where: {
-        user_id: id_user,
+        OR: [{ course: { users: { some: { userId: id_user } } } }],
+      },
+      include: {
+        activities_send: true,
+        quizz: {
+          include: {
+            sent: true,
+          },
+        },
       },
     });
   }

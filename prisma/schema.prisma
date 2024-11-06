@@ -37,6 +37,7 @@ model Course {
   owner_name  String
   section     String
   subject     String
+  verified    Boolean            @default(false)
   area        Area               @relation(fields: [areaId], references: [id])
   areaId      Int
   users       CourseEnrollment[]
@@ -117,6 +118,7 @@ model Option {
   text       String
   question   Questions @relation(fields: [questionId], references: [id])
   questionId Int
+  Answer     Answer[]
 }
 
 model QuizzSent {
@@ -127,6 +129,15 @@ model QuizzSent {
   userId      Int
   grade       Decimal  @default(0)
   create_date DateTime @default(now())
+  answer      Answer[]
+}
+
+model Answer {
+  id          Int       @id @default(autoincrement())
+  QuizzSent   QuizzSent @relation(fields: [quizzSentId], references: [id])
+  quizzSentId Int
+  option      Option    @relation(fields: [optionId], references: [id])
+  optionId    Int
 }
 
 model Status {
