@@ -9,9 +9,9 @@ import {
   Put,
 } from '@nestjs/common';
 import { CoursesService } from './courses.service';
-import { Course, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { ApiTags } from '@nestjs/swagger';
-import { nanoid } from 'nanoid';
+import { randomBytes } from 'crypto';
 
 @ApiTags('courses')
 @Controller('courses')
@@ -20,7 +20,8 @@ export class CoursesController {
 
   @Post()
   async create(@Body() course: Prisma.CourseCreateInput) {
-    course.token = nanoid();
+    const uniqueToken = randomBytes(8).toString('hex');
+    course.token = uniqueToken;
     return await this.coursesService.create(course);
   }
 
