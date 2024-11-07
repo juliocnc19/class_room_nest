@@ -1,12 +1,22 @@
-import { Activities, ActivitiesSent, Prisma } from '@prisma/client';
+import { Activities, ActivitiesSent } from '@prisma/client';
+import {
+  CreateActivitiesDto,
+  FindActivitiesForEvaluationDto,
+  FindActivitiesForUserDto,
+  FindManyActivitiesDto,
+  FindOneActivitiesDto,
+  UpdateActivitiesDto,
+} from './dto/activities.dto';
 
 export interface Activitiy {
-  create(activitiy: Prisma.ActivitiesCreateInput): Promise<Activities>;
-  findOne(id: number): Promise<Activities | null>;
-  findMany(course_id: number): Promise<Activities[] | []>;
-  delete(id: number): Promise<Activities>;
-  update(activities: Activities): Promise<Activities>;
-  myActivities(idUser: number): Promise<Activities[]>;
-  myActivitiesSent(id_user: number): Promise<Activities[]>;
-  activitiesForEvaluation(id_activity: number): Promise<ActivitiesSent[]>;
+  create(activitiy: CreateActivitiesDto): Promise<Activities>;
+  findOne(id: FindOneActivitiesDto): Promise<Activities | null>;
+  findMany(course_id: FindManyActivitiesDto): Promise<Activities[] | []>;
+  delete(id: FindOneActivitiesDto): Promise<Activities>;
+  update(activities: UpdateActivitiesDto): Promise<Activities>;
+  myActivities(idUser: FindActivitiesForUserDto): Promise<Activities[]>;
+  myActivitiesSent(id_user: FindActivitiesForUserDto): Promise<Activities[]>;
+  activitiesForEvaluation(
+    id_activity: FindActivitiesForEvaluationDto,
+  ): Promise<ActivitiesSent[]>;
 }
