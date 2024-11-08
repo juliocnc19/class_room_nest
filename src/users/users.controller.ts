@@ -1,19 +1,19 @@
-import { Controller, Get, Param, Post, Body } from '@nestjs/common';
+import { Controller, Get, Param, Post, Body, Put } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApiTags } from '@nestjs/swagger';
-import { CreateUserDto, FindUserDto } from './dto/users.dto';
+import { CreateUserDto, FindUserDto, UpdateUserDto } from './dto/users.dto';
 
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post('/create')
+  @Post()
   async create(@Body() createUserDto: CreateUserDto) {
     return await this.usersService.create(createUserDto);
   }
 
-  @Get('/find/:email')
+  @Get('/:email')
   async find(@Param('email') findUserDto: FindUserDto) {
     return await this.usersService.find(findUserDto);
   }
@@ -21,5 +21,10 @@ export class UsersController {
   @Get('/findMany')
   async findMany() {
     return await this.usersService.findMany();
+  }
+
+  @Put()
+  async update(@Body() updateUserDto: UpdateUserDto) {
+    return await this.usersService.update(updateUserDto);
   }
 }

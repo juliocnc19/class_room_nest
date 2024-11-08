@@ -39,3 +39,9 @@ export class FindUserDto {
   @IsNotEmpty()
   email: string;
 }
+
+export class UpdateUserDto extends CreateUserDto {
+  @IsInt()
+  @IsNotEmpty()
+  id: number;
+}
