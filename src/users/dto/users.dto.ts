@@ -1,6 +1,10 @@
 import { IsString, IsNotEmpty, IsInt, IsEmail } from 'class-validator';
 
 export class CreateUserDto {
+  @IsInt()
+  @IsNotEmpty()
+  roleId: number;
+
   @IsEmail()
   @IsNotEmpty()
   email: string;

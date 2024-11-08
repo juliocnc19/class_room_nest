@@ -46,6 +46,12 @@ model Course {
   Post        Post[]
 }
 
+model Role {
+  id    Int    @id @default(autoincrement())
+  role  String @unique
+  users User[]
+}
+
 model Gender {
   id     Int    @id @default(autoincrement())
   gender String @unique
@@ -68,6 +74,8 @@ model User {
   activities_sent ActivitiesSent[]
   QuizzSent       QuizzSent[]
   Post            Post[]
+  Role            Role               @relation(fields: [roleId], references: [id])
+  roleId          Int
 }
 
 model Activities {
