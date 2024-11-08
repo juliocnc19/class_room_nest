@@ -43,6 +43,7 @@ model Course {
   users       CourseEnrollment[]
   token       String             @unique
   activities  Activities[]
+  Post        Post[]
 }
 
 model Gender {
@@ -66,6 +67,7 @@ model User {
   course_owner    Course[]
   activities_sent ActivitiesSent[]
   QuizzSent       QuizzSent[]
+  Post            Post[]
 }
 
 model Activities {
@@ -83,6 +85,7 @@ model Activities {
   status_id       Int
   activities_send ActivitiesSent[]
   quizz           Quizz[]
+  Post            Post?
 }
 
 model ActivitiesSent {
@@ -144,4 +147,17 @@ model Status {
   id         Int          @id @default(autoincrement())
   status     String       @unique
   activities Activities[]
+}
+
+model Post {
+  id         Int         @id @default(autoincrement())
+  title      String
+  content    String
+  createdAt  DateTime    @default(now())
+  course     Course      @relation(fields: [courseId], references: [id])
+  courseId   Int
+  activity   Activities? @relation(fields: [activityId], references: [id])
+  activityId Int?        @unique // Clave foránea opcional, permite que algunos posts no tengan actividad asociada
+  author     User        @relation(fields: [authorId], references: [id])
+  authorId   Int
 }
