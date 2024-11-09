@@ -5,6 +5,7 @@ import {
   FindActivitiesForUserDto,
   FindManyActivitiesDto,
   FindOneActivitiesDto,
+  SendActivityDto,
   UpdateActivitiesDto,
 } from './dto/activities.dto';
 
@@ -19,4 +20,5 @@ export interface Activitiy {
   activitiesForEvaluation(
     id_activity: FindActivitiesForEvaluationDto,
   ): Promise<ActivitiesSent[]>;
+  //sendActivity(activitiy: SendActivityDto): Promise<ActivitiesSent>;
 }

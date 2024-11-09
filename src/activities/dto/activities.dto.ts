@@ -118,3 +118,20 @@ export class FindActivitiesForEvaluationDto {
   @IsNotEmpty()
   id_activity: number;
 }
+
+export class SendActivityDto {
+  @ApiProperty()
+  @IsInt()
+  @IsNotEmpty()
+  id_activity: number;
+
+  @ApiProperty()
+  @IsInt()
+  @IsNotEmpty()
+  id_user: number;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  message: string;
+}
