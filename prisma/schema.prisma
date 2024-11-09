@@ -103,6 +103,7 @@ model ActivitiesSent {
   document    String?    @default("")
   user        User       @relation(fields: [user_id], references: [id])
   user_id     Int
+  message     String?
   grade       Decimal    @default(0)
   create_date DateTime   @default(now())
 }

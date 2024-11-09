@@ -1,8 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { User } from '@prisma/client';
 import { Users } from './users.interface';
-import { CreateUserDto, FindUserDto, UpdateUserDto } from './dto/users.dto';
+import {
+  AuthenticateUserDto,
+  CreateUserDto,
+  DeleteUserDto,
+  FindUserDto,
+  UpdateUserDto,
+} from './dto/users.dto';
 
 @Injectable()
 export class UsersService implements Users {
@@ -26,6 +32,29 @@ export class UsersService implements Users {
     return this.prismaService.user.update({
       where: { id: user.id },
       data: user,
+    });
+  }
+
+  async authenticate(user: AuthenticateUserDto): Promise<User> {
+    const userFind = await this.prismaService.user.findUnique({
+      where: { email: user.email },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Credenciales incorrectas');
+    }
+
+    const isPasswordValid = user.password === userFind.password;
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Credenciales incorrectas');
+    }
+
+    return userFind;
+  }
+
+  async delete(user: DeleteUserDto): Promise<User> {
+    return this.prismaService.user.delete({
+      where: { id: user.id },
     });
   }
 }

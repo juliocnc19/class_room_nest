@@ -56,3 +56,22 @@ export class UpdateUserDto extends CreateUserDto {
   @IsNotEmpty()
   id: number;
 }
+
+export class AuthenticateUserDto {
+  @ApiProperty()
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  password: string;
+}
+
+export class DeleteUserDto {
+  @ApiProperty()
+  @IsInt()
+  @IsNotEmpty()
+  id: number;
+}
