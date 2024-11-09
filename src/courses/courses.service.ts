@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Courses } from './courses.interface';
-import { Prisma, Course, User } from '@prisma/client';
+import { Course, User } from '@prisma/client';
 import {
+  ChangeStatusCourseDto,
   CreateCourseDto,
   DeleteCourseDto,
   FindManyCourseDto,
@@ -84,6 +85,13 @@ export class CoursesService implements Courses {
     return await this.prisma.user.update({
       where: { id: deleteCourseDto.idUser },
       data: { courses: { disconnect: [{ id: deleteCourseDto.idCourse }] } },
+    });
+  }
+
+  async changeStatus(changeStatusCourseDto: ChangeStatusCourseDto) {
+    return await this.prisma.course.update({
+      where: { id: changeStatusCourseDto.id },
+      data: { verified: changeStatusCourseDto.status },
     });
   }
 }

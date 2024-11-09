@@ -12,6 +12,7 @@ import { CoursesService } from './courses.service';
 import { ApiTags } from '@nestjs/swagger';
 import { randomBytes } from 'crypto';
 import {
+  ChangeStatusCourseDto,
   CreateCourseDto,
   DeleteCourseDto,
   FindManyCourseDto,
@@ -67,5 +68,10 @@ export class CoursesController {
   @Delete('/delete/user/')
   async delteUserOfCourse(@Body() deleteCourseDto: DeleteCourseDto) {
     return await this.coursesService.delteUserOfCourse(deleteCourseDto);
+  }
+
+  @Put('/change/status')
+  async changeStatus(@Body() changeStatusCourseDto: ChangeStatusCourseDto) {
+    return await this.coursesService.changeStatus(changeStatusCourseDto);
   }
 }
