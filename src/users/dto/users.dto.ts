@@ -3,11 +3,6 @@ import { IsString, IsNotEmpty, IsInt, IsEmail } from 'class-validator';
 
 export class CreateUserDto {
   @ApiProperty()
-  @IsInt()
-  @IsNotEmpty()
-  roleId: number;
-
-  @ApiProperty()
   @IsEmail()
   @IsNotEmpty()
   email: string;
@@ -41,6 +36,11 @@ export class CreateUserDto {
   @IsInt()
   @IsNotEmpty()
   genderId: number;
+
+  @ApiProperty()
+  @IsInt()
+  @IsNotEmpty()
+  roleId: number;
 }
 
 export class FindUserDto {
