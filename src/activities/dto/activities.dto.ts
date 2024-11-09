@@ -140,3 +140,15 @@ export class SendActivityDto {
   @IsNotEmpty()
   docuemnt: number;
 }
+
+export class ActivitiesSendForStudenInCourse {
+  @ApiProperty()
+  @IsInt()
+  @IsNotEmpty()
+  user_id: number;
+
+  @ApiProperty()
+  @IsInt()
+  @IsNotEmpty()
+  course_id: number;
+}

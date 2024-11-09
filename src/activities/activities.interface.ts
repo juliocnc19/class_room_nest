@@ -1,5 +1,6 @@
 import { Activities, ActivitiesSent } from '@prisma/client';
 import {
+  ActivitiesSendForStudenInCourse,
   CreateActivitiesDto,
   FindActivitiesForEvaluationDto,
   FindActivitiesForUserDto,
@@ -21,4 +22,7 @@ export interface Activitiy {
     id_activity: FindActivitiesForEvaluationDto,
   ): Promise<ActivitiesSent[]>;
   sendActivity(activitiy: SendActivityDto): Promise<ActivitiesSent>;
+  activitiesSendForStudenInCourse(
+    body: ActivitiesSendForStudenInCourse,
+  ): Promise<ActivitiesSent[]>;
 }

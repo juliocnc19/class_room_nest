@@ -7,11 +7,13 @@ import {
   Get,
   Put,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { ActivitiesService } from './activities.service';
 import { Prisma } from '@prisma/client';
 import { ApiTags } from '@nestjs/swagger';
 import {
+  ActivitiesSendForStudenInCourse,
   CreateActivitiesDto,
   FindActivitiesForEvaluationDto,
   FindActivitiesForUserDto,
@@ -20,6 +22,7 @@ import {
   SendActivityDto,
   UpdateActivitiesDto,
 } from './dto/activities.dto';
+import { query } from 'express';
 
 @ApiTags('Activities')
 @Controller('activities')
@@ -78,5 +81,16 @@ export class ActivitiesController {
   @Post('send/activity')
   async sendActivity(@Body() activitiy: SendActivityDto) {
     return await this.activitiesService.sendActivity(activitiy);
+  }
+
+  @Get('/send/course/user/:user_id/:course_id')
+  async activitiesSendForStudenInCourse(
+    @Param('user_id', ParseIntPipe) user_id: number,
+    @Param('course_id', ParseIntPipe) course_id: number,
+  ) {
+    return await this.activitiesService.activitiesSendForStudenInCourse({
+      user_id,
+      course_id,
+    });
   }
 }

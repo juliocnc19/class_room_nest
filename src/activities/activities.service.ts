@@ -4,6 +4,7 @@ import { Activitiy } from './activities.interface';
 import { Activities, ActivitiesSent } from '@prisma/client';
 import { CloudService } from 'src/cloud/cloud.service';
 import {
+  ActivitiesSendForStudenInCourse,
   CreateActivitiesDto,
   FindActivitiesForEvaluationDto,
   FindActivitiesForUserDto,
@@ -95,5 +96,18 @@ export class ActivitiesService implements Activitiy {
 
   async sendActivity(activitiy: SendActivityDto): Promise<ActivitiesSent> {
     return await this.prismaService.activitiesSent.create({ data: activitiy });
+  }
+
+  async activitiesSendForStudenInCourse(
+    body: ActivitiesSendForStudenInCourse,
+  ): Promise<ActivitiesSent[]> {
+    return await this.prismaService.activitiesSent.findMany({
+      where: {
+        AND: [
+          { user_id: body.user_id },
+          { activity: { course_id: body.course_id } },
+        ],
+      },
+    });
   }
 }
