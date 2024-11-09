@@ -123,15 +123,20 @@ export class SendActivityDto {
   @ApiProperty()
   @IsInt()
   @IsNotEmpty()
-  id_activity: number;
+  activity_id: number;
 
   @ApiProperty()
   @IsInt()
   @IsNotEmpty()
-  id_user: number;
+  user_id: number;
 
   @ApiProperty()
   @IsString()
   @IsOptional()
   message: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  docuemnt: number;
 }

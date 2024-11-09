@@ -17,6 +17,7 @@ import {
   FindActivitiesForUserDto,
   FindManyActivitiesDto,
   FindOneActivitiesDto,
+  SendActivityDto,
   UpdateActivitiesDto,
 } from './dto/activities.dto';
 
@@ -72,5 +73,10 @@ export class ActivitiesController {
     id_activity: FindActivitiesForEvaluationDto,
   ) {
     return await this.activitiesService.activitiesForEvaluation(id_activity);
+  }
+
+  @Post('send/activity')
+  async sendActivity(@Body() activitiy: SendActivityDto) {
+    return await this.activitiesService.sendActivity(activitiy);
   }
 }

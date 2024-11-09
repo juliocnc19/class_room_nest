@@ -20,5 +20,5 @@ export interface Activitiy {
   activitiesForEvaluation(
     id_activity: FindActivitiesForEvaluationDto,
   ): Promise<ActivitiesSent[]>;
-  //sendActivity(activitiy: SendActivityDto): Promise<ActivitiesSent>;
+  sendActivity(activitiy: SendActivityDto): Promise<ActivitiesSent>;
 }

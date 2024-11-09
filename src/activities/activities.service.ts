@@ -9,6 +9,7 @@ import {
   FindActivitiesForUserDto,
   FindManyActivitiesDto,
   FindOneActivitiesDto,
+  SendActivityDto,
   UpdateActivitiesDto,
 } from './dto/activities.dto';
 
@@ -90,5 +91,9 @@ export class ActivitiesService implements Activitiy {
         activity_id: id_activity.id_activity,
       },
     });
+  }
+
+  async sendActivity(activitiy: SendActivityDto): Promise<ActivitiesSent> {
+    return await this.prismaService.activitiesSent.create({ data: activitiy });
   }
 }
