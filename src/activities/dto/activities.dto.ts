@@ -152,3 +152,15 @@ export class ActivitiesSendForStudenInCourse {
   @IsNotEmpty()
   course_id: number;
 }
+
+export class AssessActivityDto {
+  @ApiProperty()
+  @IsInt()
+  @IsNotEmpty()
+  id: number;
+
+  @ApiProperty()
+  @IsInt()
+  @IsNotEmpty()
+  grade: number;
+}

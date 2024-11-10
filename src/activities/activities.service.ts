@@ -4,6 +4,7 @@ import { Activitiy } from './activities.interface';
 import { Activities, ActivitiesSent } from '@prisma/client';
 import { CloudService } from 'src/cloud/cloud.service';
 import {
+  AssessActivityDto,
   CreateActivitiesDto,
   SendActivityDto,
   UpdateActivitiesDto,
@@ -107,5 +108,12 @@ export class ActivitiesService implements Activitiy {
 
   async findAll(): Promise<Activities[] | []> {
     return await this.prismaService.activities.findMany();
+  }
+
+  async assessActivity(data: AssessActivityDto): Promise<ActivitiesSent> {
+    return await this.prismaService.activitiesSent.update({
+      where: { id: data.id },
+      data: { grade: data.grade },
+    });
   }
 }

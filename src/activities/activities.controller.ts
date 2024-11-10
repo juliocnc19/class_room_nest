@@ -12,6 +12,7 @@ import { ActivitiesService } from './activities.service';
 import { Prisma } from '@prisma/client';
 import { ApiTags } from '@nestjs/swagger';
 import {
+  AssessActivityDto,
   CreateActivitiesDto,
   SendActivityDto,
   UpdateActivitiesDto,
@@ -84,5 +85,10 @@ export class ActivitiesController {
   @Get('find/all')
   async findAll() {
     return await this.activitiesService.findAll();
+  }
+
+  @Post('assess/activity')
+  async assessActivity(@Body() data: AssessActivityDto) {
+    return await this.activitiesService.assessActivity(data);
   }
 }

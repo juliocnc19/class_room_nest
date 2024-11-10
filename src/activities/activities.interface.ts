@@ -1,5 +1,6 @@
 import { Activities, ActivitiesSent } from '@prisma/client';
 import {
+  AssessActivityDto,
   CreateActivitiesDto,
   SendActivityDto,
   UpdateActivitiesDto,
@@ -20,4 +21,5 @@ export interface Activitiy {
     course_id: number;
   }): Promise<ActivitiesSent[]>;
   findAll(): Promise<Activities[] | []>;
+  assessActivity(data: AssessActivityDto): Promise<ActivitiesSent>;
 }
