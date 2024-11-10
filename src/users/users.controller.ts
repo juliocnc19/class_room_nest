@@ -10,6 +10,7 @@ import {
 import { UsersService } from './users.service';
 import { ApiTags } from '@nestjs/swagger';
 import {
+  AuthenticateUserDto,
   CreateUserDto,
   DeleteUserDto,
   FindUserDto,
@@ -42,7 +43,7 @@ export class UsersController {
   }
 
   @Post('/authenticate')
-  async authenticate(@Body() authenticateUserDto: CreateUserDto) {
+  async authenticate(@Body() authenticateUserDto: AuthenticateUserDto) {
     return await this.usersService.authenticate(authenticateUserDto);
   }
 
