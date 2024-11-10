@@ -23,7 +23,6 @@ export class UsersController {
 
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
-    console.log('se llamo');
     return await this.usersService.create(createUserDto);
   }
 
@@ -34,25 +33,21 @@ export class UsersController {
 
   @Get('/findMany')
   async findMany() {
-    console.log('se llamo');
     return await this.usersService.findMany();
   }
 
   @Put()
   async update(@Body() updateUserDto: UpdateUserDto) {
-    console.log('se llamo');
     return await this.usersService.update(updateUserDto);
   }
 
   @Post('/authenticate')
   async authenticate(@Body() authenticateUserDto: CreateUserDto) {
-    console.log('se llamo');
     return await this.usersService.authenticate(authenticateUserDto);
   }
 
   @Delete()
   async delete(@Body() deleteUserDto: DeleteUserDto) {
-    console.log('se llamo');
     return await this.usersService.delete(deleteUserDto);
   }
 }
