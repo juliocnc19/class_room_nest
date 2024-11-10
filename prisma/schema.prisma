@@ -160,8 +160,8 @@ model Status {
 
 model Post {
   id         Int         @id @default(autoincrement())
-  title      String
-  content    String
+  title      String      @default("")
+  content    String      @default("")
   createdAt  DateTime    @default(now())
   course     Course      @relation(fields: [courseId], references: [id])
   courseId   Int

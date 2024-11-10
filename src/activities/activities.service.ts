@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Activitiy } from './activities.interface';
 import { Activities, ActivitiesSent } from '@prisma/client';
-import { CloudService } from 'src/cloud/cloud.service';
 import {
   AssessActivityDto,
   CreateActivitiesDto,
@@ -12,13 +11,27 @@ import {
 
 @Injectable()
 export class ActivitiesService implements Activitiy {
-  constructor(
-    private readonly prismaService: PrismaService,
-    private readonly cloudService: CloudService,
-  ) {}
+  constructor(private readonly prismaService: PrismaService) {}
 
   async create(activitiy: CreateActivitiesDto): Promise<Activities> {
-    return this.prismaService.activities.create({ data: activitiy });
+    const resActivity = await this.prismaService.activities.create({
+      data: activitiy,
+    });
+
+    const course = await this.prismaService.course.findUnique({
+      where: { id: activitiy.course_id },
+    });
+
+    await this.prismaService.post.create({
+      data: {
+        title: activitiy.title,
+        content: '',
+        courseId: activitiy.course_id,
+        activityId: resActivity.id,
+        authorId: course.ownerId,
+      },
+    });
+    return resActivity;
   }
 
   async findOne(id: number): Promise<Activities | null> {
