@@ -7,13 +7,11 @@ import {
   Get,
   Put,
   Delete,
-  Query,
 } from '@nestjs/common';
 import { ActivitiesService } from './activities.service';
 import { Prisma } from '@prisma/client';
 import { ApiTags } from '@nestjs/swagger';
 import {
-  ActivitiesSendForStudenInCourse,
   CreateActivitiesDto,
   FindActivitiesForEvaluationDto,
   FindActivitiesForUserDto,
@@ -22,7 +20,6 @@ import {
   SendActivityDto,
   UpdateActivitiesDto,
 } from './dto/activities.dto';
-import { query } from 'express';
 
 @ApiTags('Activities')
 @Controller('activities')
