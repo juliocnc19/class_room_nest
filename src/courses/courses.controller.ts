@@ -15,8 +15,6 @@ import {
   ChangeStatusCourseDto,
   CreateCourseDto,
   DeleteCourseDto,
-  FindManyCourseDto,
-  FindOneCourseDto,
   JoinUserCourseDto,
   UpdateCourseDto,
 } from './dto/courses.dto';
@@ -34,17 +32,17 @@ export class CoursesController {
   }
 
   @Get('/:id')
-  async findOne(@Param('id', ParseIntPipe) id: FindOneCourseDto) {
+  async findOne(@Param('id', ParseIntPipe) id: number) {
     return await this.coursesService.findOne(id);
   }
 
   @Get('/owner/:ownerId')
-  async findMany(@Param('ownerId', ParseIntPipe) ownerId: FindManyCourseDto) {
+  async findMany(@Param('ownerId', ParseIntPipe) ownerId: number) {
     return await this.coursesService.findMany(ownerId);
   }
 
   @Delete('/:id')
-  async delete(@Param('id', ParseIntPipe) id: FindOneCourseDto) {
+  async delete(@Param('id', ParseIntPipe) id: number) {
     return await this.coursesService.delete(id);
   }
 
@@ -54,9 +52,7 @@ export class CoursesController {
   }
 
   @Get('/users/:id')
-  async findUserOfCourse(
-    @Param('id', ParseIntPipe) course_id: FindOneCourseDto,
-  ) {
+  async findUserOfCourse(@Param('id', ParseIntPipe) course_id: number) {
     return await this.coursesService.findUserOfCourse(course_id);
   }
 
@@ -73,5 +69,10 @@ export class CoursesController {
   @Put('/change/status')
   async changeStatus(@Body() changeStatusCourseDto: ChangeStatusCourseDto) {
     return await this.coursesService.changeStatus(changeStatusCourseDto);
+  }
+
+  @Get('/find/all')
+  async findAll() {
+    return await this.coursesService.findAll();
   }
 }

@@ -6,8 +6,6 @@ import {
   ChangeStatusCourseDto,
   CreateCourseDto,
   DeleteCourseDto,
-  FindManyCourseDto,
-  FindOneCourseDto,
   JoinUserCourseDto,
   UpdateCourseDto,
 } from './dto/courses.dto';
@@ -20,21 +18,21 @@ export class CoursesService implements Courses {
     return await this.prisma.course.create({ data: createCourseDto });
   }
 
-  async findOne(findOneCourseDto: FindOneCourseDto): Promise<Course | null> {
+  async findOne(id: number): Promise<Course | null> {
     return await this.prisma.course.findUnique({
-      where: { id: findOneCourseDto.id },
+      where: { id },
     });
   }
 
-  async findMany(findManyCourseDto: FindManyCourseDto): Promise<Array<Course>> {
+  async findMany(ownerId: number): Promise<Array<Course>> {
     return await this.prisma.course.findMany({
-      where: { ownerId: findManyCourseDto.ownerId },
+      where: { ownerId },
     });
   }
 
-  async delete(deleteCourseId: FindOneCourseDto): Promise<Course> {
+  async delete(id: number): Promise<Course> {
     return await this.prisma.course.delete({
-      where: { id: deleteCourseId.id },
+      where: { id },
     });
   }
 
@@ -45,9 +43,9 @@ export class CoursesService implements Courses {
     });
   }
 
-  async findUserOfCourse(findOneCourseDto: FindOneCourseDto): Promise<Course> {
+  async findUserOfCourse(id: number): Promise<Course> {
     return await this.prisma.course.findUnique({
-      where: { id: findOneCourseDto.id },
+      where: { id },
       include: {
         users: {
           include: {
@@ -93,5 +91,9 @@ export class CoursesService implements Courses {
       where: { id: changeStatusCourseDto.id },
       data: { verified: changeStatusCourseDto.status },
     });
+  }
+
+  async findAll(): Promise<Array<Course>> {
+    return await this.prisma.course.findMany();
   }
 }

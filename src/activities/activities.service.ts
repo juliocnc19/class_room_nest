@@ -4,12 +4,7 @@ import { Activitiy } from './activities.interface';
 import { Activities, ActivitiesSent } from '@prisma/client';
 import { CloudService } from 'src/cloud/cloud.service';
 import {
-  ActivitiesSendForStudenInCourse,
   CreateActivitiesDto,
-  FindActivitiesForEvaluationDto,
-  FindActivitiesForUserDto,
-  FindManyActivitiesDto,
-  FindOneActivitiesDto,
   SendActivityDto,
   UpdateActivitiesDto,
 } from './dto/activities.dto';
@@ -25,18 +20,18 @@ export class ActivitiesService implements Activitiy {
     return this.prismaService.activities.create({ data: activitiy });
   }
 
-  async findOne(id: FindOneActivitiesDto): Promise<Activities | null> {
-    return this.prismaService.activities.findUnique({ where: { id: id.id } });
+  async findOne(id: number): Promise<Activities | null> {
+    return this.prismaService.activities.findUnique({ where: { id } });
   }
 
-  async findMany(course_id: FindManyActivitiesDto): Promise<Activities[] | []> {
+  async findMany(course_id: number): Promise<Activities[] | []> {
     return this.prismaService.activities.findMany({
-      where: { course_id: course_id.course_id },
+      where: { course_id },
     });
   }
 
-  async delete(id: FindOneActivitiesDto): Promise<Activities> {
-    return this.prismaService.activities.delete({ where: { id: id.id } });
+  async delete(id: number): Promise<Activities> {
+    return this.prismaService.activities.delete({ where: { id } });
   }
 
   async update(activities: UpdateActivitiesDto): Promise<Activities> {
@@ -46,10 +41,10 @@ export class ActivitiesService implements Activitiy {
     });
   }
 
-  async myActivities(idUser: FindActivitiesForUserDto): Promise<Activities[]> {
+  async myActivities(idUser: number): Promise<Activities[]> {
     return await this.prismaService.activities.findMany({
       where: {
-        OR: [{ course: { users: { some: { userId: idUser.userId } } } }],
+        OR: [{ course: { users: { some: { userId: idUser } } } }],
       },
       include: {
         status: {
@@ -66,12 +61,10 @@ export class ActivitiesService implements Activitiy {
     });
   }
 
-  async myActivitiesSent(
-    id_user: FindActivitiesForUserDto,
-  ): Promise<Activities[]> {
+  async myActivitiesSent(id_user: number): Promise<Activities[]> {
     return await this.prismaService.activities.findMany({
       where: {
-        OR: [{ course: { users: { some: { userId: id_user.userId } } } }],
+        OR: [{ course: { users: { some: { userId: id_user } } } }],
       },
       include: {
         activities_send: true,
@@ -85,11 +78,11 @@ export class ActivitiesService implements Activitiy {
   }
 
   async activitiesForEvaluation(
-    id_activity: FindActivitiesForEvaluationDto,
+    id_activity: number,
   ): Promise<ActivitiesSent[]> {
     return await this.prismaService.activitiesSent.findMany({
       where: {
-        activity_id: id_activity.id_activity,
+        activity_id: id_activity,
       },
     });
   }
@@ -98,9 +91,10 @@ export class ActivitiesService implements Activitiy {
     return await this.prismaService.activitiesSent.create({ data: activitiy });
   }
 
-  async activitiesSendForStudenInCourse(
-    body: ActivitiesSendForStudenInCourse,
-  ): Promise<ActivitiesSent[]> {
+  async activitiesSendForStudenInCourse(body: {
+    user_id: number;
+    course_id: number;
+  }): Promise<ActivitiesSent[]> {
     return await this.prismaService.activitiesSent.findMany({
       where: {
         AND: [
@@ -109,5 +103,9 @@ export class ActivitiesService implements Activitiy {
         ],
       },
     });
+  }
+
+  async findAll(): Promise<Activities[] | []> {
+    return await this.prismaService.activities.findMany();
   }
 }

@@ -49,20 +49,6 @@ export class CreateCourseDto {
   areaId: number;
 }
 
-export class FindOneCourseDto {
-  @ApiProperty()
-  @IsInt()
-  @IsNotEmpty()
-  id: number;
-}
-
-export class FindManyCourseDto {
-  @ApiProperty()
-  @IsInt()
-  @IsNotEmpty()
-  ownerId: number;
-}
-
 export class JoinUserCourseDto {
   @ApiProperty()
   @IsInt()

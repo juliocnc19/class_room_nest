@@ -13,10 +13,6 @@ import { Prisma } from '@prisma/client';
 import { ApiTags } from '@nestjs/swagger';
 import {
   CreateActivitiesDto,
-  FindActivitiesForEvaluationDto,
-  FindActivitiesForUserDto,
-  FindManyActivitiesDto,
-  FindOneActivitiesDto,
   SendActivityDto,
   UpdateActivitiesDto,
 } from './dto/activities.dto';
@@ -32,19 +28,17 @@ export class ActivitiesController {
   }
 
   @Get('/:id')
-  async findOne(@Param('id', ParseIntPipe) id: FindOneActivitiesDto) {
+  async findOne(@Param('id', ParseIntPipe) id: number) {
     return await this.activitiesService.findOne(id);
   }
 
   @Get('/course/:course_id')
-  async findMany(
-    @Param('course_id', ParseIntPipe) course_id: FindManyActivitiesDto,
-  ) {
+  async findMany(@Param('course_id', ParseIntPipe) course_id: number) {
     return await this.activitiesService.findMany(course_id);
   }
 
   @Delete('/:id')
-  async delete(@Param('id', ParseIntPipe) id: FindOneActivitiesDto) {
+  async delete(@Param('id', ParseIntPipe) id: number) {
     return await this.activitiesService.delete(id);
   }
 
@@ -54,23 +48,19 @@ export class ActivitiesController {
   }
 
   @Get('/myActivities/:id_user')
-  async myActivities(
-    @Param('id_user', ParseIntPipe) idUser: FindActivitiesForUserDto,
-  ) {
+  async myActivities(@Param('id_user', ParseIntPipe) idUser: number) {
     return await this.activitiesService.myActivities(idUser);
   }
 
   @Get('mine/sent/:id_user')
-  async myActivitiesSent(
-    @Param('id_user', ParseIntPipe) id_user: FindActivitiesForUserDto,
-  ) {
+  async myActivitiesSent(@Param('id_user', ParseIntPipe) id_user: number) {
     return await this.activitiesService.myActivitiesSent(id_user);
   }
 
   @Get('for/evaluation/:id_activity')
   async activitiesForEvaluation(
     @Param('id_activity', ParseIntPipe)
-    id_activity: FindActivitiesForEvaluationDto,
+    id_activity: number,
   ) {
     return await this.activitiesService.activitiesForEvaluation(id_activity);
   }
@@ -89,5 +79,10 @@ export class ActivitiesController {
       user_id,
       course_id,
     });
+  }
+
+  @Get('find/all')
+  async findAll() {
+    return await this.activitiesService.findAll();
   }
 }
