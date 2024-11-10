@@ -138,7 +138,7 @@ export class SendActivityDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  docuemnt: string;
+  document: string;
 }
 
 export class ActivitiesSendForStudenInCourse {
