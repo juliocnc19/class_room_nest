@@ -13,7 +13,6 @@ import {
   AuthenticateUserDto,
   CreateUserDto,
   DeleteUserDto,
-  FindUserDto,
   UpdateUserDto,
 } from './dto/users.dto';
 
@@ -28,7 +27,7 @@ export class UsersController {
   }
 
   @Get('/find/:email')
-  async find(@Param('email') findUserDto: FindUserDto) {
+  async find(@Param('email') findUserDto: string) {
     return await this.usersService.find(findUserDto);
   }
 

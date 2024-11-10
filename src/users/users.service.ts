@@ -6,7 +6,6 @@ import {
   AuthenticateUserDto,
   CreateUserDto,
   DeleteUserDto,
-  FindUserDto,
   UpdateUserDto,
 } from './dto/users.dto';
 
@@ -18,9 +17,9 @@ export class UsersService implements Users {
     return this.prismaService.user.create({ data: user });
   }
 
-  async find(findUserDto: FindUserDto): Promise<User> {
+  async find(email: string): Promise<User> {
     return this.prismaService.user.findUnique({
-      where: { email: findUserDto.email },
+      where: { email: email },
     });
   }
 
