@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Activitiy } from './activities.interface';
-import { Activities, ActivitiesSent } from '@prisma/client';
+import { Activities, ActivitiesSent, Post, Prisma } from '@prisma/client';
 import {
   AssessActivityDto,
   CreateActivitiesDto,

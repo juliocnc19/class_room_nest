@@ -1,4 +1,4 @@
-import { Activities, ActivitiesSent } from '@prisma/client';
+import { Activities, ActivitiesSent, Post } from '@prisma/client';
 import {
   AssessActivityDto,
   CreateActivitiesDto,
