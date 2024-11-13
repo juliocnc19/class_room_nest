@@ -20,7 +20,7 @@ export class CloudController {
       storage: multer.memoryStorage(),
     }),
   )
-  async sendActivity(@UploadedFile() file: Express.Multer.File) {
+  async sendActivityFile(@UploadedFile() file: Express.Multer.File) {
     return await this.cloudService.uploadFile(file);
   }
 }
