@@ -30,8 +30,9 @@ export class CloudService {
       }
       return { data, error: null };
     } catch (error) {
+      const { message } = error;
       console.log(error);
-      throw new HttpException('Error al subir archivo', 500);
+      throw new HttpException(message, 500);
     }
   }
 }
