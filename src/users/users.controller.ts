@@ -6,6 +6,7 @@ import {
   Body,
   Put,
   Delete,
+  HttpStatus,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApiTags } from '@nestjs/swagger';
@@ -23,31 +24,61 @@ export class UsersController {
 
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
-    return await this.usersService.create(createUserDto);
+    const user = await this.usersService.create(createUserDto);
+    return {
+      code: HttpStatus.CREATED,
+      message: 'User created',
+      data: user,
+    };
   }
 
   @Get('/find/:email')
   async find(@Param('email') findUserDto: string) {
-    return await this.usersService.find(findUserDto);
+    const user = await this.usersService.find(findUserDto);
+    return {
+      code: HttpStatus.OK,
+      message: 'User found',
+      data: user,
+    };
   }
 
   @Get('/findMany')
   async findMany() {
-    return await this.usersService.findMany();
+    const users = await this.usersService.findMany();
+    return {
+      code: HttpStatus.OK,
+      message: 'Users found',
+      data: users,
+    };
   }
 
   @Put()
   async update(@Body() updateUserDto: UpdateUserDto) {
-    return await this.usersService.update(updateUserDto);
+    const user = await this.usersService.update(updateUserDto);
+    return {
+      code: HttpStatus.OK,
+      message: 'Users updated',
+      data: user,
+    };
   }
 
   @Post('/authenticate')
   async authenticate(@Body() authenticateUserDto: AuthenticateUserDto) {
-    return await this.usersService.authenticate(authenticateUserDto);
+    const user = await this.usersService.authenticate(authenticateUserDto);
+    return {
+      code: HttpStatus.OK,
+      message: 'Authenticated',
+      data: user,
+    };
   }
 
   @Delete()
-  async delete(@Body() deleteUserDto: DeleteUserDto) {
-    return await this.usersService.delete(deleteUserDto);
+  async delete(@Body() deleteUserDto: number) {
+    const user = await this.usersService.delete(deleteUserDto);
+    return {
+      code: HttpStatus.OK,
+      message: 'User deleted',
+      data: user,
+    };
   }
 }
