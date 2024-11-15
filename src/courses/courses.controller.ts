@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Delete,
   Put,
+  HttpStatus,
 } from '@nestjs/common';
 import { CoursesService } from './courses.service';
 import { ApiTags } from '@nestjs/swagger';
@@ -28,51 +29,103 @@ export class CoursesController {
   async create(@Body() createCourseDto: CreateCourseDto) {
     const uniqueToken = randomBytes(8).toString('hex');
     createCourseDto.token = uniqueToken;
-    return await this.coursesService.create(createCourseDto);
+    const course = await this.coursesService.create(createCourseDto);
+    return {
+      code: HttpStatus.OK,
+      message: 'Course created',
+      data: course,
+    };
   }
 
   @Get('/:id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
-    return await this.coursesService.findOne(id);
+    const course = await this.coursesService.findOne(id);
+    return {
+      code: HttpStatus.OK,
+      message: 'Course found',
+      data: course,
+    };
   }
 
   @Get('/owner/:ownerId')
   async findMany(@Param('ownerId', ParseIntPipe) ownerId: number) {
-    return await this.coursesService.findMany(ownerId);
+    const courses = await this.coursesService.findMany(ownerId);
+    return {
+      code: HttpStatus.OK,
+      message: 'Courses found',
+      data: courses,
+    };
   }
 
   @Delete('/:id')
   async delete(@Param('id', ParseIntPipe) id: number) {
-    return await this.coursesService.delete(id);
+    const course = await this.coursesService.delete(id);
+    return {
+      code: HttpStatus.OK,
+      message: 'Course deleted',
+      data: course,
+    };
   }
 
   @Put('/')
   async update(@Body() course: UpdateCourseDto) {
-    return await this.coursesService.update(course);
+    const courseUpdate = await this.coursesService.update(course);
+    return {
+      code: HttpStatus.OK,
+      message: 'Course deleted',
+      data: courseUpdate,
+    };
   }
 
   @Get('/users/:id')
   async findUserOfCourse(@Param('id', ParseIntPipe) course_id: number) {
-    return await this.coursesService.findUserOfCourse(course_id);
+    const course = await this.coursesService.findUserOfCourse(course_id);
+    return {
+      code: HttpStatus.OK,
+      message: 'Users found',
+      data: course,
+    };
   }
 
   @Post('/join')
   async joinToCourse(@Body() joinUserCourseDto: JoinUserCourseDto) {
-    return await this.coursesService.joinToCourse(joinUserCourseDto);
+    const jointed = await this.coursesService.joinToCourse(joinUserCourseDto);
+    return {
+      code: HttpStatus.OK,
+      message: 'User joined',
+      data: jointed,
+    };
   }
 
   @Delete('/delete/user/')
   async delteUserOfCourse(@Body() deleteCourseDto: DeleteCourseDto) {
-    return await this.coursesService.delteUserOfCourse(deleteCourseDto);
+    const user = await this.coursesService.delteUserOfCourse(deleteCourseDto);
+    return {
+      code: HttpStatus.OK,
+      message: 'User deleted',
+      data: user,
+    };
   }
 
   @Put('/change/status')
   async changeStatus(@Body() changeStatusCourseDto: ChangeStatusCourseDto) {
-    return await this.coursesService.changeStatus(changeStatusCourseDto);
+    const course = await this.coursesService.changeStatus(
+      changeStatusCourseDto,
+    );
+    return {
+      code: HttpStatus.OK,
+      message: 'Course updated',
+      data: course,
+    };
   }
 
   @Get('/find/all')
   async findAll() {
-    return await this.coursesService.findAll();
+    const courses = await this.coursesService.findAll();
+    return {
+      code: HttpStatus.OK,
+      message: 'Courses found',
+      data: courses,
+    };
   }
 }

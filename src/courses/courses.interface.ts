@@ -1,4 +1,4 @@
-import { Course, User } from '@prisma/client';
+import { Course, CourseEnrollment, User } from '@prisma/client';
 import {
   ChangeStatusCourseDto,
   CreateCourseDto,
@@ -14,7 +14,7 @@ export interface Courses {
   delete(id: number): Promise<Course>;
   update(course: UpdateCourseDto): Promise<Course>;
   findUserOfCourse(course_id: number): Promise<Course>;
-  joinToCourse(joinUserCourseDto: JoinUserCourseDto): Promise<Course>;
+  joinToCourse(joinUserCourseDto: JoinUserCourseDto): Promise<CourseEnrollment>;
   delteUserOfCourse(deleteCourseDto: DeleteCourseDto): Promise<User>;
   changeStatus(changeStatusCourseDto: ChangeStatusCourseDto): Promise<Course>;
   findAll(): Promise<Array<Course>>;

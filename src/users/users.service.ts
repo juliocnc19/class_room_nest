@@ -10,7 +10,6 @@ import { Users } from './users.interface';
 import {
   AuthenticateUserDto,
   CreateUserDto,
-  DeleteUserDto,
   UpdateUserDto,
 } from './dto/users.dto';
 
