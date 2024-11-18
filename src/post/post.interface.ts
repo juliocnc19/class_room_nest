@@ -7,4 +7,5 @@ export interface Post {
   findPostById(id: number): Promise<PostPrisma>;
   updatePost(post: UpdatePostDto): Promise<PostPrisma>;
   deletePost(id: number): Promise<PostPrisma>;
+  findPostByCourse(course_id: number): Promise<PostPrisma[]>;
 }

@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpStatus,
   Param,
   ParseIntPipe,
   Post,
@@ -19,26 +20,61 @@ export class PostController {
 
   @Post()
   async createPost(@Body() post: CreatePostDto) {
-    return await this.postService.createPost(post);
+    const postCreated = await this.postService.createPost(post);
+    return {
+      code: HttpStatus.CREATED,
+      message: 'Post created',
+      data: postCreated,
+    };
   }
 
   @Get('all')
   async findAllPosts() {
-    return await this.postService.findAllPosts();
+    const posts = await this.postService.findAllPosts();
+    return {
+      code: HttpStatus.OK,
+      message: 'All posts',
+      data: posts,
+    };
   }
 
   @Get(':id')
   async findPostById(@Param('id', ParseIntPipe) id: number) {
-    return await this.postService.findPostById(id);
+    const post = await this.postService.findPostById(id);
+    return {
+      code: HttpStatus.OK,
+      message: 'Post found',
+      data: post,
+    };
   }
 
   @Put()
   async updatePost(@Body() post: UpdatePostDto) {
-    return await this.postService.updatePost(post);
+    const postUpdate = await this.postService.updatePost(post);
+    return {
+      code: HttpStatus.OK,
+      message: 'Post updated',
+      data: postUpdate,
+    };
   }
 
   @Delete(':id')
   async deletePost(@Param('id', ParseIntPipe) id: number) {
-    return await this.postService.deletePost(id);
+    const post = await this.postService.deletePost(id);
+    return {
+      code: HttpStatus.OK,
+      message: 'Post deleted',
+      data: post,
+    };
+  }
+
+  @Get('/course/:course_id')
+  async fidndPostByCourse(@Param('course_id', ParseIntPipe) course_id: number) {
+    const post = await this.postService.findPostByCourse(course_id);
+    return {
+      code: HttpStatus.OK,
+      message: 'Posts found',
+      data: post,
+    };
   }
 }

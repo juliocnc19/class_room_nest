@@ -1,4 +1,4 @@
-import { Activities, ActivitiesSent, Post } from '@prisma/client';
+import { Activities, ActivitiesSent } from '@prisma/client';
 import {
   AssessActivityDto,
   CreateActivitiesDto,
@@ -16,10 +16,10 @@ export interface Activitiy {
   myActivitiesSent(id_user: number): Promise<Activities[]>;
   activitiesForEvaluation(id_activity: number): Promise<ActivitiesSent[]>;
   sendActivity(activitiy: SendActivityDto): Promise<ActivitiesSent>;
-  activitiesSendForStudenInCourse(body: {
-    user_id: number;
-    course_id: number;
-  }): Promise<ActivitiesSent[]>;
+  activitiesSendForStudenInCourse(
+    user_id: number,
+    course_id: number,
+  ): Promise<ActivitiesSent[]>;
   findAll(): Promise<Activities[] | []>;
   assessActivity(data: AssessActivityDto): Promise<ActivitiesSent>;
 }
