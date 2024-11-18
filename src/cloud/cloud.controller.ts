@@ -1,5 +1,6 @@
 import {
   Controller,
+  HttpStatus,
   Post,
   UploadedFile,
   UseInterceptors,
@@ -21,6 +22,11 @@ export class CloudController {
     }),
   )
   async sendActivityFile(@UploadedFile() file: Express.Multer.File) {
-    return await this.cloudService.uploadFile(file);
+    const fileUpload = await this.cloudService.uploadFile(file);
+    return {
+      code: HttpStatus.OK,
+      message: 'File uploaded',
+      data: fileUpload,
+    };
   }
 }

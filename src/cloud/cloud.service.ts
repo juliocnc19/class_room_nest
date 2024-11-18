@@ -14,25 +14,35 @@ export class CloudService {
 
   async uploadFile(
     file: Express.Multer.File,
-  ): Promise<{ data: any; error: any }> {
+  ): Promise<{ id: string; path: string; fullPath: string }> {
     try {
       const { data, error } = await this.supabase.storage
         .from(this.bucketName)
         .upload(`uploads/${file.originalname}`, file.buffer, {
           contentType: file.mimetype,
         });
-
       if (error) {
         throw new HttpException(
-          error.message,
+          {
+            code: HttpStatus.INTERNAL_SERVER_ERROR,
+            message: 'Error uploading file',
+            data: {},
+          },
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }
-      return { data, error: null };
-    } catch (error) {
-      const { message } = error;
+      return data;
+    } catch (e) {
+      const error = e as Error;
       console.log(error);
-      throw new HttpException(message, 500);
+      throw new HttpException(
+        {
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message,
+          data: {},
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }
