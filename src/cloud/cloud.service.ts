@@ -25,7 +25,7 @@ export class CloudService {
         throw new HttpException(
           {
             code: HttpStatus.INTERNAL_SERVER_ERROR,
-            message: 'Error uploading file',
+            message: error.message,
             data: {},
           },
           HttpStatus.INTERNAL_SERVER_ERROR,
