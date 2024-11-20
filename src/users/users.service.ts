@@ -25,7 +25,7 @@ export class UsersService implements Users {
         },
       });
 
-      if (validationUser)
+      if (validationUser.length > 0)
         throw new HttpException(
           {
             code: HttpStatus.CONFLICT,
