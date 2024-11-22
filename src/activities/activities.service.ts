@@ -79,6 +79,9 @@ export class ActivitiesService implements Activitiy {
     try {
       return this.prismaService.activities.findMany({
         where: { course_id },
+        include: {
+          quizz: true,
+        },
       });
     } catch (e) {
       const error = e as Error;
@@ -158,6 +161,7 @@ export class ActivitiesService implements Activitiy {
               title: true,
             },
           },
+          quizz: true,
         },
       });
     } catch (e) {
@@ -266,7 +270,11 @@ export class ActivitiesService implements Activitiy {
 
   async findAll(): Promise<Activities[] | []> {
     try {
-      return await this.prismaService.activities.findMany();
+      return await this.prismaService.activities.findMany({
+        include: {
+          quizz: true,
+        },
+      });
     } catch (e) {
       const error = e as Error;
       throw new HttpException(

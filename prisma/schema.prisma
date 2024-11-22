@@ -89,6 +89,7 @@ model Activities {
   end_date        String
   email           String
   digital         Boolean          @default(true)
+  isQuizz         Boolean          @default(false)
   status          Status           @relation(fields: [status_id], references: [id])
   status_id       Int
   activities_send ActivitiesSent[]
