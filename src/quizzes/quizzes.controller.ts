@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  HttpStatus,
+} from '@nestjs/common';
 import { QuizzesService } from './quizzes.service';
 import { CreateQuizzDto } from './dto/create-quiz.dto';
 import { AnswerQuizzDto } from './dto/answer-quiz.dto';
@@ -30,7 +38,10 @@ export class QuizzesController {
     description: 'Quiz answered and graded successfully',
   })
   @Post(':id/answer')
-  async answer(@Param('id') id: number, @Body() answerQuizzDto: AnswerQuizzDto) {
+  async answer(
+    @Param('id') id: number,
+    @Body() answerQuizzDto: AnswerQuizzDto,
+  ) {
     const result = await this.quizzesService.answerQuizz(id, answerQuizzDto);
     return {
       code: HttpStatus.OK,
@@ -61,11 +72,12 @@ export class QuizzesController {
   })
   @Delete(':id')
   async deleteQuizz(@Param('id') id: number) {
-    await this.quizzesService.deleteQuizz(id);
+    const data = await this.quizzesService.deleteQuizz(id);
     return {
       code: HttpStatus.OK,
       message: 'Quiz deleted successfully',
-      data: null,
+      data: data,
     };
   }
 }
+

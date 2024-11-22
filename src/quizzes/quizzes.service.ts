@@ -3,7 +3,6 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateQuizzDto } from './dto/create-quiz.dto';
 import { AnswerQuizzDto } from './dto/answer-quiz.dto';
 
-
 @Injectable()
 export class QuizzesService {
   constructor(private readonly prisma: PrismaService) {}
@@ -66,7 +65,9 @@ export class QuizzesService {
       let correctAnswers = 0;
 
       quizz.question.forEach((question) => {
-        const userAnswer = answers.find((ans) => ans.questionId === question.id)?.optionId;
+        const userAnswer = answers.find(
+          (ans) => ans.questionId === question.id,
+        )?.optionId;
         if (userAnswer === question.answer) {
           correctAnswers++;
         }
