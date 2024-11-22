@@ -5,6 +5,7 @@ import { CoursesModule } from './courses/courses.module';
 import { ActivitiesModule } from './activities/activities.module';
 import { CloudModule } from './cloud/cloud.module';
 import { PostModule } from './post/post.module';
+import { QuizzesModule } from './quizzes/quizzes.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { PostModule } from './post/post.module';
     ActivitiesModule,
     CloudModule,
     PostModule,
+    QuizzesModule,
   ],
   providers: [],
 })
