@@ -299,4 +299,24 @@ export class CoursesService implements Courses {
       );
     }
   }
+
+  async findCourseOfUser(user_id: number): Promise<Array<Course>> {
+    try {
+      return await this.prismaService.course.findMany({
+        where: {
+          OR: [{ ownerId: user_id }, { users: { some: { userId: user_id } } }],
+        },
+      });
+    } catch (e) {
+      const error = e as Error;
+      throw new HttpException(
+        {
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message,
+          data: {},
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }

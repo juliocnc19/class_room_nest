@@ -128,4 +128,14 @@ export class CoursesController {
       data: courses,
     };
   }
+
+  @Get('find/course/users')
+  async findCourseOfUser(@Body() user_id: number) {
+    const courses = await this.coursesService.findCourseOfUser(user_id);
+    return {
+      code: HttpStatus.OK,
+      message: 'Courses found',
+      data: courses,
+    };
+  }
 }

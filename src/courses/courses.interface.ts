@@ -18,4 +18,5 @@ export interface Courses {
   delteUserOfCourse(deleteCourseDto: DeleteCourseDto): Promise<User>;
   changeStatus(changeStatusCourseDto: ChangeStatusCourseDto): Promise<Course>;
   findAll(): Promise<Array<Course>>;
+  findCourseOfUser(user_id: number): Promise<Array<Course>>;
 }
