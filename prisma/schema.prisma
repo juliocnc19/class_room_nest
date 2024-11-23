@@ -166,6 +166,7 @@ model Post {
   createdAt  DateTime    @default(now())
   course     Course      @relation(fields: [courseId], references: [id])
   courseId   Int
+  file       String      @default("")
   activity   Activities? @relation(fields: [activityId], references: [id])
   activityId Int?        @unique // Clave foránea opcional, permite que algunos posts no tengan actividad asociada
   author     User        @relation(fields: [authorId], references: [id])
