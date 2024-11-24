@@ -5,6 +5,7 @@ import {
   IsNotEmpty,
   IsString,
   IsOptional,
+  IsBoolean,
 } from 'class-validator';
 
 export class CreateActivitiesDto {
@@ -42,6 +43,10 @@ export class CreateActivitiesDto {
   @IsEmail()
   @IsNotEmpty()
   email: string;
+
+  // @ApiProperty({ description: 'Digital activity flag', example: true })
+  // @IsBoolean()
+  // digital: boolean;
 
   @ApiProperty()
   @IsInt()

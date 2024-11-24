@@ -1,7 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateQuizzDto } from './dto/create-quiz.dto';
+import { CreateQuizzDto, CreateQuizzDto2 } from './dto/create-quiz.dto';
 import { AnswerQuizzDto } from './dto/answer-quiz.dto';
+import { Quizz } from '@prisma/client';
 
 @Injectable()
 export class QuizzesService {
@@ -38,6 +39,67 @@ export class QuizzesService {
       );
     }
   }
+
+  async createQuizz2(data: CreateQuizzDto2): Promise<Quizz> {
+    try {
+      const {
+        title,
+        description,
+        grade,
+        startDate,
+        endDate,
+        digital, // Esto no se usa en el DTO original, pero puedes adaptarlo si es necesario
+        statusId,
+        courseId,
+        questions,
+        email
+      } = data;
+  
+      // Crear la actividad
+      const activity = await this.prisma.activities.create({
+        data: {
+          title,
+          description,
+          grade,
+          start_date: startDate,
+          end_date: endDate,
+          email,
+          digital,
+          isQuizz: true,
+          status: { connect: { id: statusId } }, // Relación con el estado
+          course: { connect: { id: courseId } }, // Relación con el curso
+        },
+      });
+  
+      // Crear el quizz asociado
+      const quizz = await this.prisma.quizz.create({
+        data: {
+          activity_id: activity.id,
+          question: {
+            create: questions.map((question) => ({
+              text: question.text,
+              answer: question.answer,
+              options: {
+                create: question.options.map((option) => ({ text: option })),
+              },
+            })),
+          },
+        },
+      });
+  
+      return quizz;
+    } catch (error) {
+      throw new HttpException(
+        {
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: 'Failed to create quiz',
+          data: { error: error.message },
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+  
 
   async answerQuizz(quizzId: number, data: AnswerQuizzDto) {
     try {

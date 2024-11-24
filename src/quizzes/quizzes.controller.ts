@@ -8,7 +8,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { QuizzesService } from './quizzes.service';
-import { CreateQuizzDto } from './dto/create-quiz.dto';
+import { CreateQuizzDto, CreateQuizzDto2 } from './dto/create-quiz.dto';
 import { AnswerQuizzDto } from './dto/answer-quiz.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
@@ -25,6 +25,21 @@ export class QuizzesController {
   @Post()
   async create(@Body() createQuizzDto: CreateQuizzDto) {
     const quizz = await this.quizzesService.createQuizz(createQuizzDto);
+    return {
+      code: HttpStatus.CREATED,
+      message: 'Quiz created successfully',
+      data: quizz,
+    };
+  }
+
+  @ApiOperation({ summary: 'Create a new quiz' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Quiz created successfully',
+  })
+  @Post("/new")
+  async createQuizz(@Body() createQuizzDto: CreateQuizzDto2) {
+    const quizz = await this.quizzesService.createQuizz2(createQuizzDto);
     return {
       code: HttpStatus.CREATED,
       message: 'Quiz created successfully',
