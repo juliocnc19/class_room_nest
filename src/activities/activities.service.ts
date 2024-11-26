@@ -75,14 +75,38 @@ export class ActivitiesService implements Activitiy {
     }
   }
 
-  async findMany(course_id: number): Promise<Activities[] | []> {
+
+  async findMany(course_id: number): Promise<Activities[]> {
     try {
-      return this.prismaService.activities.findMany({
+      const activities = await this.prismaService.activities.findMany({
         where: { course_id },
         include: {
-          quizz: true,
+          quizz: {
+            include: {
+              question: {
+                include: {
+                  options: true, // Include options for each question
+                },
+              },
+            },
+          },
         },
       });
+  
+      // Map the result to match the Activities type
+      return activities.map((activity) => ({
+        id: activity.id,
+        title: activity.title,
+        course_id: activity.course_id,
+        description: activity.description,
+        grade: activity.grade,
+        start_date: activity.start_date,
+        end_date: activity.end_date,
+        email: activity.email,
+        digital: activity.digital,
+        isQuizz: activity.isQuizz,
+        status_id: activity.status_id,
+      }));
     } catch (e) {
       const error = e as Error;
       throw new HttpException(
