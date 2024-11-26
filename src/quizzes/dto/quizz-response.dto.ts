@@ -27,4 +27,5 @@ interface QuizOption {
     activity_id: number;
     activity: QuizActivity;
     question: QuizQuestion[];
+    quizzId: number;
   }

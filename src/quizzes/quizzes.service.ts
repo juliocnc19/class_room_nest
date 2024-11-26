@@ -151,6 +151,8 @@ export class QuizzesService {
             text: opt.text,
           })),
         })),
+        quizzId: completeQuiz.id, // Add the quiz ID explicitly
+
       };
     } catch (error) {
       throw new HttpException(
@@ -239,6 +241,7 @@ export class QuizzesService {
         data: {
           grade,
           submission,
+          quizzId: quizz.id, // Add the quiz ID explicitly
           quizz, // Include the full quiz data in the response
         },
       };
