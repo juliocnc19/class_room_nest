@@ -104,13 +104,16 @@ export class QuizzesService {
   async answerQuizz(quizzId: number, data: AnswerQuizzDto) {
     try {
       const { userId, answers } = data;
-
+  
       // Fetch the quiz questions and correct answers
       const quizz = await this.prisma.quizz.findUnique({
         where: { id: quizzId },
-        include: { question: true },
+        include: {
+          question: true,
+          activity: true, // Incluir la actividad asociada al quiz
+        },
       });
-
+  
       if (!quizz) {
         throw new HttpException(
           {
@@ -121,11 +124,11 @@ export class QuizzesService {
           HttpStatus.NOT_FOUND,
         );
       }
-
+  
       // Calculate grade
       const totalQuestions = quizz.question.length;
       let correctAnswers = 0;
-
+  
       quizz.question.forEach((question) => {
         const userAnswer = answers.find(
           (ans) => ans.questionId === question.id,
@@ -134,9 +137,9 @@ export class QuizzesService {
           correctAnswers++;
         }
       });
-
+  
       const grade = (correctAnswers / totalQuestions) * 100;
-
+  
       // Save user's submission
       const submission = await this.prisma.quizzSent.create({
         data: {
@@ -150,8 +153,22 @@ export class QuizzesService {
           },
         },
       });
-
-      return { grade, submission };
+  
+      // Update the grade of the associated activity
+      if (quizz.activity) {
+        await this.prisma.activities.update({
+          where: { id: quizz.activity.id },
+          data: {
+            grade, // Actualiza la calificación de la actividad
+          },
+        });
+      }
+  
+      return {
+        code: HttpStatus.OK,
+        message: 'Quiz submitted and graded successfully',
+        data: { grade, submission },
+      };
     } catch (error) {
       throw new HttpException(
         {
@@ -163,6 +180,7 @@ export class QuizzesService {
       );
     }
   }
+  
 
   async getQuizz(id: number) {
     try {
