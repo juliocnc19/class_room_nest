@@ -40,7 +40,7 @@ export class QuizzesService {
     }
   }
 
-  async createQuizz2(data: CreateQuizzDto2): Promise<Quizz> {
+  async createQuizz2(data: CreateQuizzDto2): Promise<CompleteQuizResponse> {
     try {
       const {
         title,
@@ -48,14 +48,30 @@ export class QuizzesService {
         grade,
         startDate,
         endDate,
-        digital, // Esto no se usa en el DTO original, pero puedes adaptarlo si es necesario
+        digital,
         statusId,
         courseId,
         questions,
-        email
+        email,
       } = data;
   
-      // Crear la actividad
+      // Verify the Course exists
+      const course = await this.prisma.course.findUnique({
+        where: { id: courseId },
+      });
+  
+      if (!course) {
+        throw new HttpException(
+          {
+            code: HttpStatus.NOT_FOUND,
+            message: 'Course not found',
+            data: {},
+          },
+          HttpStatus.NOT_FOUND,
+        );
+      }
+  
+      // Create the activity
       const activity = await this.prisma.activities.create({
         data: {
           title,
@@ -66,12 +82,12 @@ export class QuizzesService {
           email,
           digital,
           isQuizz: true,
-          status: { connect: { id: statusId } }, // Relación con el estado
-          course: { connect: { id: courseId } }, // Relación con el curso
+          status: { connect: { id: statusId } },
+          course: { connect: { id: courseId } },
         },
       });
   
-      // Crear el quizz asociado
+      // Create the quiz associated with the activity
       const quizz = await this.prisma.quizz.create({
         data: {
           activity_id: activity.id,
@@ -87,7 +103,55 @@ export class QuizzesService {
         },
       });
   
-      return quizz;
+      // Fetch the complete quiz details
+      const completeQuiz = await this.prisma.quizz.findUnique({
+        where: { id: quizz.id },
+        include: {
+          activity: true,
+          question: {
+            include: {
+              options: true,
+            },
+          },
+        },
+      });
+  
+      // Map the Prisma response to the CompleteQuizResponse interface
+      if (!completeQuiz) {
+        throw new HttpException(
+          {
+            code: HttpStatus.NOT_FOUND,
+            message: 'Quiz not found after creation',
+            data: {},
+          },
+          HttpStatus.NOT_FOUND,
+        );
+      }
+  
+      return {
+        id: completeQuiz.id,
+        activity_id: completeQuiz.activity_id,
+        activity: {
+          id: completeQuiz.activity.id,
+          title: completeQuiz.activity.title,
+          description: completeQuiz.activity.description,
+          grade: parseFloat(completeQuiz.activity.grade.toString()),
+          start_date: completeQuiz.activity.start_date,
+          end_date: completeQuiz.activity.end_date,
+          email: completeQuiz.activity.email,
+          digital: completeQuiz.activity.digital,
+          isQuizz: completeQuiz.activity.isQuizz,
+        },
+        question: completeQuiz.question.map((q) => ({
+          id: q.id,
+          text: q.text,
+          answer: q.answer,
+          options: q.options.map((opt) => ({
+            id: opt.id,
+            text: opt.text,
+          })),
+        })),
+      };
     } catch (error) {
       throw new HttpException(
         {
@@ -100,6 +164,7 @@ export class QuizzesService {
     }
   }
   
+  
 
   async answerQuizz(quizzId: number, data: AnswerQuizzDto) {
     try {
@@ -109,8 +174,12 @@ export class QuizzesService {
       const quizz = await this.prisma.quizz.findUnique({
         where: { id: quizzId },
         include: {
-          question: true,
-          activity: true, // Incluir la actividad asociada al quiz
+          question: {
+            include: {
+              options: true, // Include options for each question
+            },
+          },
+          activity: true, // Include the activity associated with the quiz
         },
       });
   
@@ -159,7 +228,7 @@ export class QuizzesService {
         await this.prisma.activities.update({
           where: { id: quizz.activity.id },
           data: {
-            grade, // Actualiza la calificación de la actividad
+            grade, // Update the grade of the associated activity
           },
         });
       }
@@ -167,7 +236,11 @@ export class QuizzesService {
       return {
         code: HttpStatus.OK,
         message: 'Quiz submitted and graded successfully',
-        data: { grade, submission },
+        data: {
+          grade,
+          submission,
+          quizz, // Include the full quiz data in the response
+        },
       };
     } catch (error) {
       throw new HttpException(
@@ -180,6 +253,7 @@ export class QuizzesService {
       );
     }
   }
+  
   
 
   async getQuizz(id: number) {
