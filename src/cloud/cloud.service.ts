@@ -16,11 +16,39 @@ export class CloudService {
     file: Express.Multer.File,
   ): Promise<{ id: string; path: string; fullPath: string }> {
     try {
+      const filePath = `uploads/${file.originalname}`;
+
+      const { data: existingFile, error: checkError } =
+        await this.supabase.storage
+          .from(this.bucketName)
+          .list('uploads', { search: file.originalname });
+
+      if (checkError) {
+        throw new HttpException(
+          {
+            code: HttpStatus.INTERNAL_SERVER_ERROR,
+            message: checkError.message,
+            data: {},
+          },
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+
+      if (existingFile && existingFile.length > 0) {
+        return {
+          id: existingFile[0].id,
+          path: `uploads/${existingFile[0].name}`,
+          fullPath: `${this.bucketName}/${filePath}`,
+        };
+      }
+
+      // Si no existe, subir el archivo
       const { data, error } = await this.supabase.storage
         .from(this.bucketName)
-        .upload(`uploads/${file.originalname}`, file.buffer, {
+        .upload(filePath, file.buffer, {
           contentType: file.mimetype,
         });
+
       if (error) {
         throw new HttpException(
           {
@@ -31,7 +59,12 @@ export class CloudService {
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }
-      return data;
+
+      return {
+        id: data.id,
+        path: data.path,
+        fullPath: `${this.bucketName}/${data.path}`,
+      };
     } catch (e) {
       const error = e as Error;
       console.log(error);
