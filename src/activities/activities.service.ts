@@ -76,7 +76,7 @@ export class ActivitiesService implements Activitiy {
   }
 
 
-  async findMany(course_id: number): Promise<Activities[]> {
+  async findMany(course_id: number): Promise<ActivityResponse[]> {
     try {
       const activities = await this.prismaService.activities.findMany({
         where: { course_id },
@@ -85,7 +85,7 @@ export class ActivitiesService implements Activitiy {
             include: {
               question: {
                 include: {
-                  options: true, // Include options for each question
+                  options: true,
                 },
               },
             },
@@ -93,19 +93,29 @@ export class ActivitiesService implements Activitiy {
         },
       });
   
-      // Map the result to match the Activities type
+      // Map the result to match the ActivityResponse interface
       return activities.map((activity) => ({
         id: activity.id,
-        title: activity.title,
         course_id: activity.course_id,
+        title: activity.title,
         description: activity.description,
-        grade: activity.grade,
+        grade: activity.grade.toNumber(), // Convert Decimal to string
         start_date: activity.start_date,
         end_date: activity.end_date,
         email: activity.email,
         digital: activity.digital,
         isQuizz: activity.isQuizz,
         status_id: activity.status_id,
+        quizzId: activity.quizz?.[0]?.id || null,
+        questions: activity.quizz?.[0]?.question.map((question) => ({
+          id: question.id,
+          text: question.text,
+          answer: question.answer,
+          options: question.options.map((option) => ({
+            id: option.id,
+            text: option.text,
+          })),
+        })) || [],
       }));
     } catch (e) {
       const error = e as Error;

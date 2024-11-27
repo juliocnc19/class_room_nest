@@ -9,7 +9,7 @@ import {
 export interface Activitiy {
   create(activitiy: CreateActivitiesDto): Promise<Activities>;
   findOne(id: number): Promise<Activities | null>;
-  findMany(course_id: number): Promise<Activities[] | []>;
+  findMany(course_id: number): Promise<ActivityResponse[] | []>;
   delete(id: number): Promise<Activities>;
   update(activities: UpdateActivitiesDto): Promise<Activities>;
   myActivities(idUser: number): Promise<Activities[]>;
