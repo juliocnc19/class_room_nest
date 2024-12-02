@@ -141,6 +141,13 @@ export class UsersService implements Users {
     if (!isPasswordValid) {
       throw new UnauthorizedException('invalid credentials');
     }
+    
+    if(user.firebaseToken) {
+      await this.prismaService.user.update({
+        where: { id: userFind.id },
+        data: { firebaseToken: user.firebaseToken },
+      });
+    }
 
     return userFind;
   }

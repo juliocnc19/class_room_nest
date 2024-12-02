@@ -8,30 +8,73 @@ import {
   SendActivityDto,
   UpdateActivitiesDto,
 } from './dto/activities.dto';
+import { NotificationsService } from 'src/notifications/notifications.service';
 
 @Injectable()
 export class ActivitiesService implements Activitiy {
-  constructor(private readonly prismaService: PrismaService) {}
-
-  async create(activitiy: CreateActivitiesDto): Promise<Activities> {
+  constructor(private readonly prismaService: PrismaService, private notificationsService: NotificationsService) {}
+  async create(activity: CreateActivitiesDto): Promise<Activities> {
     try {
+      // Create the activity in the database
       const resActivity = await this.prismaService.activities.create({
-        data: activitiy,
+        data: activity,
       });
-
+  
+      // Fetch the course details
       const course = await this.prismaService.course.findUnique({
-        where: { id: activitiy.course_id },
+        where: { id: activity.course_id },
       });
-
+  
+      if (!course) {
+        throw new HttpException(
+          {
+            code: HttpStatus.NOT_FOUND,
+            message: 'Course not found',
+            data: {},
+          },
+          HttpStatus.NOT_FOUND,
+        );
+      }
+  
+      // Create a post associated with the activity
       await this.prismaService.post.create({
         data: {
-          title: activitiy.title,
+          title: activity.title,
           content: '',
-          courseId: activitiy.course_id,
+          courseId: activity.course_id,
           activityId: resActivity.id,
           authorId: course.ownerId,
         },
       });
+  
+      // Fetch all users enrolled in the course
+      const enrolledUsers = await this.prismaService.courseEnrollment.findMany({
+        where: { courseId: activity.course_id },
+        include: {
+          user: true, // Include user details to access firebaseToken
+        },
+      });
+  
+      // Collect valid Firebase tokens
+      const tokens = enrolledUsers
+        .map((enrollment) => enrollment.user.firebaseToken)
+        .filter((token) => token); // Exclude null or empty tokens
+  
+      if (tokens.length > 0) {
+        // Send notification to enrolled users
+        const notificationTitle = `New activity in course ${course.title}`;
+        const notificationBody = `Activity "${activity.title}" has been created.`;
+        await this.notificationsService.sendNotification({
+          tokens,
+          title: notificationTitle,
+          body: notificationBody,
+          data: {
+            courseId: activity.course_id.toString(),
+            activityId: resActivity.id.toString(),
+          },
+        });
+      }
+  
       return resActivity;
     } catch (e) {
       const error = e as Error;
@@ -45,6 +88,7 @@ export class ActivitiesService implements Activitiy {
       );
     }
   }
+  
 
   async findOne(id: number): Promise<Activities | null> {
     try {

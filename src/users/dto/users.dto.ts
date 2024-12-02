@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsInt, IsEmail } from 'class-validator';
+import { IsString, IsNotEmpty, IsInt, IsEmail, IsOptional } from 'class-validator';
 
 export class CreateUserDto {
   @ApiProperty()
@@ -16,6 +16,11 @@ export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
   user_name: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  firebaseToken: string;
 
   @ApiProperty()
   @IsString()
@@ -67,6 +72,11 @@ export class AuthenticateUserDto {
   @IsString()
   @IsNotEmpty()
   password: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  firebaseToken: string;
 }
 
 export class DeleteUserDto {

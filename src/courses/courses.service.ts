@@ -9,10 +9,14 @@ import {
   JoinUserCourseDto,
   UpdateCourseDto,
 } from './dto/courses.dto';
+import { NotificationsService } from 'src/notifications/notifications.service';
 
 @Injectable()
 export class CoursesService implements Courses {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+     private notificationsService: NotificationsService
+     ) {}
 
   async create(createCourseDto: CreateCourseDto): Promise<Course> {
     try {
@@ -185,13 +189,17 @@ export class CoursesService implements Courses {
     joinUserCourseDto: JoinUserCourseDto,
   ): Promise<CourseEnrollment> {
     try {
+      // Fetch the course details using the token
       const course = await this.prismaService.course.findUnique({
         where: {
           token: joinUserCourseDto.token,
         },
+        include: {
+          owner: true, // Include course owner details
+        },
       });
-
-      if (!course)
+  
+      if (!course) {
         throw new HttpException(
           {
             code: HttpStatus.NOT_FOUND,
@@ -200,15 +208,17 @@ export class CoursesService implements Courses {
           },
           HttpStatus.NOT_FOUND,
         );
-
+      }
+  
+      // Add the user to the course
       const jointed = await this.prismaService.courseEnrollment.create({
         data: {
           userId: joinUserCourseDto.id,
           courseId: course.id,
         },
       });
-
-      if (!jointed)
+  
+      if (!jointed) {
         throw new HttpException(
           {
             code: HttpStatus.NOT_MODIFIED,
@@ -217,7 +227,41 @@ export class CoursesService implements Courses {
           },
           HttpStatus.NOT_MODIFIED,
         );
-
+      }
+  
+      // Fetch the joining user's details
+      const user = await this.prismaService.user.findUnique({
+        where: { id: joinUserCourseDto.id },
+      });
+  
+      if (!user) {
+        throw new HttpException(
+          {
+            code: HttpStatus.NOT_FOUND,
+            message: 'User not found',
+            data: {},
+          },
+          HttpStatus.NOT_FOUND,
+        );
+      }
+  
+      // Send a notification to the course owner
+      const ownerToken = course.owner.firebaseToken;
+      if (ownerToken) {
+        const notificationTitle = `A new user joined your course`;
+        const notificationBody = `${user.name} ${user.last_name} has joined the course "${course.title}".`;
+  
+        await this.notificationsService.sendNotification({
+          tokens: [ownerToken],
+          title: notificationTitle,
+          body: notificationBody,
+          data: {
+            courseId: course.id.toString(),
+            userId: user.id.toString(),
+          },
+        });
+      }
+  
       return jointed;
     } catch (e) {
       const error = e as Error;
@@ -231,6 +275,7 @@ export class CoursesService implements Courses {
       );
     }
   }
+  
 
   async delteUserOfCourse(deleteCourseDto: DeleteCourseDto): Promise<User> {
     try {

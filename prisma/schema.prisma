@@ -63,6 +63,7 @@ model User {
   email           String             @unique
   password        String
   create_date     DateTime           @default(now())
+  firebaseToken   String?           
   user_name       String             @unique
   gender          Gender             @relation(fields: [genderId], references: [id])
   genderId        Int

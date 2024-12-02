@@ -6,6 +6,7 @@ import { ActivitiesModule } from './activities/activities.module';
 import { CloudModule } from './cloud/cloud.module';
 import { PostModule } from './post/post.module';
 import { QuizzesModule } from './quizzes/quizzes.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { QuizzesModule } from './quizzes/quizzes.module';
     CloudModule,
     PostModule,
     QuizzesModule,
+    NotificationsModule,
   ],
   providers: [],
 })
