@@ -6,10 +6,7 @@ import {
 } from './dto/create-notification.dto';
 import { NotificationResponseDto } from './dto/notification-response.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import dotenv from 'dotenv';
 
-// Load environment variables
-dotenv.config();
 
 
 
