@@ -1,7 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Body } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
-import { NotificationDto, NotificationToAllUsersDto } from './dto/create-notification.dto';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  NotificationDto,
+  NotificationToAllUsersDto,
+} from './dto/create-notification.dto';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { NotificationResponseDto } from './dto/notification-response.dto';
 
 @ApiTags('Notifications')
@@ -15,7 +18,8 @@ export class NotificationsController {
   @ApiResponse({ status: 400, description: 'Bad Request' })
   async sendNotification(@Body() notificationDto: NotificationDto) {
     try {
-      const result = await this.notificationsService.sendNotification(notificationDto);
+      const result =
+        await this.notificationsService.sendNotification(notificationDto);
       return {
         message: 'Notifications sent successfully',
         result,
@@ -28,13 +32,18 @@ export class NotificationsController {
     }
   }
 
-
   @Post('send-to-all')
   @ApiOperation({ summary: 'Send a notification to all users' })
-  @ApiResponse({ status: 200, description: 'Notifications sent successfully', type: NotificationResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Notifications sent successfully',
+    type: NotificationResponseDto,
+  })
   async sendNotificationToAllUsers(
     @Body() notificationDto: NotificationToAllUsersDto,
   ): Promise<NotificationResponseDto> {
-    return this.notificationsService.sendNotificationToAllUsers(notificationDto);
+    return this.notificationsService.sendNotificationToAllUsers(
+      notificationDto,
+    );
   }
 }

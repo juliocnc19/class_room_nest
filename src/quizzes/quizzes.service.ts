@@ -2,12 +2,14 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateQuizzDto, CreateQuizzDto2 } from './dto/create-quiz.dto';
 import { AnswerQuizzDto } from './dto/answer-quiz.dto';
-import { Quizz } from '@prisma/client';
 import { NotificationsService } from 'src/notifications/notifications.service';
 
 @Injectable()
 export class QuizzesService {
-  constructor(private readonly prisma: PrismaService, private notificationsService: NotificationsService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private notificationsService: NotificationsService,
+  ) {}
 
   async createQuizz(data: CreateQuizzDto) {
     try {
@@ -55,12 +57,12 @@ export class QuizzesService {
         questions,
         email,
       } = data;
-  
+
       // Verify the Course exists
       const course = await this.prisma.course.findUnique({
         where: { id: courseId },
       });
-  
+
       if (!course) {
         throw new HttpException(
           {
@@ -71,7 +73,7 @@ export class QuizzesService {
           HttpStatus.NOT_FOUND,
         );
       }
-  
+
       // Create the activity
       const activity = await this.prisma.activities.create({
         data: {
@@ -87,7 +89,7 @@ export class QuizzesService {
           course: { connect: { id: courseId } },
         },
       });
-  
+
       // Create the quiz associated with the activity
       const quizz = await this.prisma.quizz.create({
         data: {
@@ -103,7 +105,7 @@ export class QuizzesService {
           },
         },
       });
-  
+
       // Fetch all users related to the course except the specified userId
       const users = await this.prisma.courseEnrollment.findMany({
         where: {
@@ -113,12 +115,12 @@ export class QuizzesService {
           user: true, // Include user details to get firebaseToken
         },
       });
-  
+
       // Collect valid Firebase tokens
       const tokens = users
         .map((enrollment) => enrollment.user.firebaseToken)
         .filter((token) => token); // Exclude null or empty tokens
-  
+
       if (tokens.length > 0) {
         // Send notification
         const notificationTitle = `New quiz in course ${course.title}`;
@@ -134,7 +136,7 @@ export class QuizzesService {
           },
         });
       }
-  
+
       // Fetch the complete quiz details
       const completeQuiz = await this.prisma.quizz.findUnique({
         where: { id: quizz.id },
@@ -147,7 +149,7 @@ export class QuizzesService {
           },
         },
       });
-  
+
       if (!completeQuiz) {
         throw new HttpException(
           {
@@ -158,7 +160,7 @@ export class QuizzesService {
           HttpStatus.NOT_FOUND,
         );
       }
-  
+
       return {
         id: completeQuiz.id,
         activity_id: completeQuiz.activity_id,
@@ -195,14 +197,11 @@ export class QuizzesService {
       );
     }
   }
-  
-  
-  
 
   async answerQuizz(quizzId: number, data: AnswerQuizzDto) {
     try {
       const { userId, answers } = data;
-  
+
       const quizz = await this.prisma.quizz.findUnique({
         where: { id: quizzId },
         include: {
@@ -212,7 +211,7 @@ export class QuizzesService {
           activity: true,
         },
       });
-  
+
       if (!quizz) {
         throw new HttpException(
           {
@@ -223,19 +222,21 @@ export class QuizzesService {
           HttpStatus.NOT_FOUND,
         );
       }
-  
+
       const totalQuestions = quizz.question.length;
       let correctAnswers = 0;
-  
+
       quizz.question.forEach((question) => {
-        const userAnswer = answers.find((ans) => ans.questionId === question.id)?.optionId;
+        const userAnswer = answers.find(
+          (ans) => ans.questionId === question.id,
+        )?.optionId;
         if (userAnswer === question.answer) {
           correctAnswers++;
         }
       });
-  
+
       const grade = (correctAnswers / totalQuestions) * 100;
-  
+
       // Save user's submission
       const submission = await this.prisma.quizzSent.create({
         data: {
@@ -249,7 +250,7 @@ export class QuizzesService {
           },
         },
       });
-  
+
       // Save the activity in ActivitiesSent
       if (quizz.activity) {
         await this.prisma.activitiesSent.create({
@@ -261,7 +262,7 @@ export class QuizzesService {
           },
         });
       }
-  
+
       return {
         grade,
         submission,
@@ -277,9 +278,6 @@ export class QuizzesService {
       );
     }
   }
-  
-  
-  
 
   async getQuizz(id: number) {
     try {
@@ -292,7 +290,7 @@ export class QuizzesService {
           },
         },
       });
-  
+
       if (!quizz) {
         throw new HttpException(
           {
@@ -303,7 +301,7 @@ export class QuizzesService {
           HttpStatus.NOT_FOUND,
         );
       }
-  
+
       return {
         id: quizz.id,
         activity: quizz.activity,
@@ -325,7 +323,6 @@ export class QuizzesService {
       );
     }
   }
-  
 
   async deleteQuizz(id: number) {
     try {
@@ -333,7 +330,7 @@ export class QuizzesService {
         where: { id },
         include: { activity: true },
       });
-  
+
       if (!quizz) {
         throw new HttpException(
           {
@@ -344,19 +341,19 @@ export class QuizzesService {
           HttpStatus.NOT_FOUND,
         );
       }
-  
+
       // Delete associated activity
       if (quizz.activity) {
         await this.prisma.activities.delete({
           where: { id: quizz.activity.id },
         });
       }
-  
+
       // Delete the quiz
       await this.prisma.quizz.delete({
         where: { id },
       });
-  
+
       return {
         message: 'Quiz and associated activity deleted successfully',
       };
@@ -371,5 +368,4 @@ export class QuizzesService {
       );
     }
   }
-  
 }
