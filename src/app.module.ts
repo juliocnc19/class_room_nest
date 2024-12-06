@@ -7,6 +7,7 @@ import { CloudModule } from './cloud/cloud.module';
 import { PostModule } from './post/post.module';
 import { QuizzesModule } from './quizzes/quizzes.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     PostModule,
     QuizzesModule,
     NotificationsModule,
+    ChatModule,
   ],
   providers: [],
 })

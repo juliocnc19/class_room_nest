@@ -44,12 +44,16 @@ model Course {
   token       String             @unique
   activities  Activities[]
   Post        Post[]
+
+  ChatRoom ChatRoom[]
 }
 
 model Role {
   id    Int    @id @default(autoincrement())
   role  String @unique
   users User[]
+
+  ChatRoomUser ChatRoomUser[]
 }
 
 model Gender {
@@ -77,6 +81,16 @@ model User {
   Post            Post[]
   Role            Role               @relation(fields: [roleId], references: [id])
   roleId          Int
+
+  Message Message[]
+
+  ChatRoomUser ChatRoomUser[]
+
+  UserStatus UserStatus[]
+
+  BlockedUser BlockedUser[] @relation("blockedUser")
+
+  BlockedBy BlockedUser[] @relation("blockedBy")
 }
 
 model Activities {
@@ -172,4 +186,66 @@ model Post {
   activityId Int?        @unique // Clave foránea opcional, permite que algunos posts no tengan actividad asociada
   author     User        @relation(fields: [authorId], references: [id])
   authorId   Int
+}
+
+model ChatRoom {
+  id          Int             @id @default(autoincrement())
+  name        String?
+  isGroup     Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+  users       ChatRoomUser[]
+  messages    Message[]
+  course      Course?          @relation(fields: [courseId], references: [id])
+  courseId    Int?
+}
+
+model ChatRoomUser {
+  id          Int        @id @default(autoincrement())
+  user        User       @relation(fields: [userId], references: [id])
+  userId      Int
+  chatRoom    ChatRoom   @relation(fields: [chatRoomId], references: [id])
+  chatRoomId  Int
+  role        Role       @relation(fields: [roleId], references: [id])
+  roleId      Int
+  isActive    Boolean    @default(true)
+  lastSeen    DateTime   @default(now())
+  isTyping    Boolean    @default(false)
+  isBlocked   Boolean    @default(false)
+}
+
+model Message {
+  id          Int        @id @default(autoincrement())
+  content     String?
+  sender      User       @relation(fields: [senderId], references: [id])
+  senderId    Int
+  chatRoom    ChatRoom   @relation(fields: [chatRoomId], references: [id])
+  chatRoomId  Int
+  sentAt      DateTime   @default(now())
+  isRead      Boolean    @default(false)
+  messageType MessageType @default(TEXT)
+  fileUrl     String?
+}
+
+model UserStatus {
+  id          Int        @id @default(autoincrement())
+  user        User       @relation(fields: [userId], references: [id])
+  userId      Int
+  isOnline    Boolean    @default(false)
+  lastActive  DateTime   @default(now())
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  VIDEO
+  FILE
+}
+
+model BlockedUser {
+  id          Int        @id @default(autoincrement())
+  blocker     User       @relation("blockedBy", fields: [blockerId], references: [id])
+  blockerId   Int
+  blocked     User       @relation("blockedUser", fields: [blockedId], references: [id])
+  blockedId   Int
+  blockedAt   DateTime   @default(now())
 }
