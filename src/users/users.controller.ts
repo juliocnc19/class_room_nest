@@ -24,61 +24,31 @@ export class UsersController {
 
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
-    const user = await this.usersService.create(createUserDto);
-    return {
-      code: HttpStatus.CREATED,
-      message: 'User created',
-      data: user,
-    };
+    return this.usersService.create(createUserDto);
   }
 
   @Get('/find/:email')
-  async find(@Param('email') findUserDto: string) {
-    const user = await this.usersService.find(findUserDto);
-    return {
-      code: HttpStatus.OK,
-      message: 'User found',
-      data: user,
-    };
+  async find(@Param('email') email: string) {
+    return this.usersService.find(email);
   }
 
   @Get('/findMany')
   async findMany() {
-    const users = await this.usersService.findMany();
-    return {
-      code: HttpStatus.OK,
-      message: 'Users found',
-      data: users,
-    };
+    return this.usersService.findMany();
   }
 
   @Put()
   async update(@Body() updateUserDto: UpdateUserDto) {
-    const user = await this.usersService.update(updateUserDto);
-    return {
-      code: HttpStatus.OK,
-      message: 'Users updated',
-      data: user,
-    };
+    return this.usersService.update(updateUserDto);
   }
 
   @Post('/authenticate')
   async authenticate(@Body() authenticateUserDto: AuthenticateUserDto) {
-    const user = await this.usersService.authenticate(authenticateUserDto);
-    return {
-      code: HttpStatus.OK,
-      message: 'Authenticated',
-      data: user,
-    };
+    return this.usersService.authenticate(authenticateUserDto);
   }
 
-  @Delete()
-  async delete(@Body() deleteUserDto: number) {
-    const user = await this.usersService.delete(deleteUserDto);
-    return {
-      code: HttpStatus.OK,
-      message: 'User deleted',
-      data: user,
-    };
+  @Delete('/:id')
+  async delete(@Param('id') userId: number) {
+    return this.usersService.delete(userId);
   }
 }

@@ -12,12 +12,13 @@ import {
   CreateUserDto,
   UpdateUserDto,
 } from './dto/users.dto';
+import { errorResponse, successResponse } from 'src/utils/responseHttpUtils';
 
 @Injectable()
 export class UsersService implements Users {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async create(user: CreateUserDto): Promise<User> {
+  async create(user: CreateUserDto): Promise<any> {
     try {
       const validationUser = await this.prismaService.user.findMany({
         where: {
@@ -25,159 +26,106 @@ export class UsersService implements Users {
         },
       });
 
-      if (validationUser.length > 0)
-        throw new HttpException(
-          {
-            code: HttpStatus.CONFLICT,
-            message: 'User already exists',
-            data: {},
-          },
-          HttpStatus.CONFLICT,
-        );
+      if (validationUser.length > 0) {
+        return errorResponse('El usuario ya existe', HttpStatus.CONFLICT);
+      }
 
-      return this.prismaService.user.create({ data: user });
-    } catch (e) {
-      const error = e as Error;
-      throw new HttpException(
-        {
-          code: HttpStatus.INTERNAL_SERVER_ERROR,
-          message: error.message,
-          data: {},
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      const newUser = await this.prismaService.user.create({ data: user });
+      return successResponse(newUser, 'Usuario creado exitosamente');
+    } catch (error) {
+      return errorResponse('Error al crear el usuario', HttpStatus.INTERNAL_SERVER_ERROR, error);
     }
   }
 
-  async find(email: string): Promise<User> {
+  async find(email: string): Promise<any> {
     try {
       const user = await this.prismaService.user.findUnique({
-        where: { email: email },
+        where: { email },
       });
 
-      if (!user)
-        throw new HttpException(
-          {
-            code: HttpStatus.NOT_FOUND,
-            message: 'User not exists',
-            data: {},
-          },
-          HttpStatus.NOT_FOUND,
-        );
-      return user;
-    } catch (e) {
-      const error = e as Error;
-      throw new HttpException(
-        {
-          code: HttpStatus.INTERNAL_SERVER_ERROR,
-          message: error.message,
-          data: {},
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      if (!user) {
+        return errorResponse('El usuario no existe', HttpStatus.NOT_FOUND);
+      }
+
+      return successResponse(user, 'Usuario encontrado exitosamente');
+    } catch (error) {
+      return errorResponse('Error al buscar el usuario', HttpStatus.INTERNAL_SERVER_ERROR, error);
     }
   }
 
-  async findMany(): Promise<User[]> {
+  async findMany(): Promise<any> {
     try {
-      return this.prismaService.user.findMany();
-    } catch (e) {
-      const error = e as Error;
-      throw new HttpException(
-        {
-          code: HttpStatus.INTERNAL_SERVER_ERROR,
-          message: error.message,
-          data: {},
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      const users = await this.prismaService.user.findMany();
+      return successResponse(users, 'Lista de usuarios obtenida exitosamente');
+    } catch (error) {
+      return errorResponse('Error al obtener la lista de usuarios', HttpStatus.INTERNAL_SERVER_ERROR, error);
     }
   }
 
-  async update(user: UpdateUserDto): Promise<User> {
+  async update(user: UpdateUserDto): Promise<any> {
     try {
       const userFound = await this.prismaService.user.findUnique({
-        where: {
-          id: user.id,
-        },
+        where: { id: user.id },
       });
 
-      if (!userFound)
-        throw new HttpException(
-          {
-            code: HttpStatus.NOT_FOUND,
-            message: 'User not found',
-            data: {},
-          },
-          HttpStatus.NOT_FOUND,
-        );
-      return this.prismaService.user.update({
+      if (!userFound) {
+        return errorResponse('El usuario no existe', HttpStatus.NOT_FOUND);
+      }
+
+      const updatedUser = await this.prismaService.user.update({
         where: { id: user.id },
         data: user,
       });
-    } catch (e) {
-      const error = e as Error;
-      throw new HttpException(
-        {
-          code: HttpStatus.INTERNAL_SERVER_ERROR,
-          message: error.message,
-          data: {},
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      return successResponse(updatedUser, 'Usuario actualizado exitosamente');
+    } catch (error) {
+      return errorResponse('Error al actualizar el usuario', HttpStatus.INTERNAL_SERVER_ERROR, error);
     }
   }
 
-  async authenticate(user: AuthenticateUserDto): Promise<User> {
-    const userFind = await this.prismaService.user.findUnique({
-      where: { email: user.email },
-    });
-
-    if (!userFind) {
-      throw new UnauthorizedException('User not exists');
-    }
-
-    const isPasswordValid = user.password === userFind.password;
-    if (!isPasswordValid) {
-      throw new UnauthorizedException('invalid credentials');
-    }
-    
-    if(user.firebaseToken) {
-      await this.prismaService.user.update({
-        where: { id: userFind.id },
-        data: { firebaseToken: user.firebaseToken },
-      });
-    }
-
-    return userFind;
-  }
-
-  async delete(userId: number): Promise<User> {
+  async authenticate(user: AuthenticateUserDto): Promise<any> {
     try {
-      const userFind = await this.prismaService.user.delete({
+      const userFind = await this.prismaService.user.findUnique({
+        where: { email: user.email },
+      });
+
+      if (!userFind) {
+        return errorResponse('El usuario no existe', HttpStatus.UNAUTHORIZED);
+      }
+
+      const isPasswordValid = user.password === userFind.password;
+      if (!isPasswordValid) {
+        return errorResponse('Credenciales inválidas', HttpStatus.UNAUTHORIZED);
+      }
+
+      if (user.firebaseToken) {
+        await this.prismaService.user.update({
+          where: { id: userFind.id },
+          data: { firebaseToken: user.firebaseToken },
+        });
+      }
+
+      return successResponse(userFind, 'Autenticación exitosa');
+    } catch (error) {
+      return errorResponse('Error al autenticar el usuario', HttpStatus.INTERNAL_SERVER_ERROR, error);
+    }
+  }
+
+  async delete(userId: number): Promise<any> {
+    try {
+      const userFind = await this.prismaService.user.findUnique({
         where: { id: userId },
       });
 
-      if (!userFind)
-        throw new HttpException(
-          {
-            code: HttpStatus.NOT_FOUND,
-            message: 'User not exists',
-            data: {},
-          },
-          HttpStatus.NOT_FOUND,
-        );
-      return userFind;
-    } catch (e) {
-      const error = e as Error;
-      throw new HttpException(
-        {
-          code: HttpStatus.INTERNAL_SERVER_ERROR,
-          message: error.message,
-          data: {},
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      if (!userFind) {
+        return errorResponse('El usuario no existe', HttpStatus.NOT_FOUND);
+      }
+
+      await this.prismaService.user.delete({ where: { id: userId } });
+      return successResponse(null, 'Usuario eliminado exitosamente');
+    } catch (error) {
+      return errorResponse('Error al eliminar el usuario', HttpStatus.INTERNAL_SERVER_ERROR, error);
     }
   }
+
+ 
 }

@@ -24,12 +24,7 @@ export class QuizzesController {
   })
   @Post()
   async create(@Body() createQuizzDto: CreateQuizzDto) {
-    const quizz = await this.quizzesService.createQuizz(createQuizzDto);
-    return {
-      code: HttpStatus.CREATED,
-      message: 'Quiz created successfully',
-      data: quizz,
-    };
+    return this.quizzesService.createQuizz(createQuizzDto);
   }
 
   @ApiOperation({ summary: 'Create a new quiz' })
@@ -39,12 +34,8 @@ export class QuizzesController {
   })
   @Post("/new")
   async createQuizz(@Body() createQuizzDto: CreateQuizzDto2) {
-    const quizz = await this.quizzesService.createQuizz2(createQuizzDto);
-    return {
-      code: HttpStatus.CREATED,
-      message: 'Quiz created successfully',
-      data: quizz,
-    };
+    return await this.quizzesService.createQuizz2(createQuizzDto);
+
   }
 
   @ApiOperation({ summary: 'Submit answers for a quiz and grade them' })
@@ -57,12 +48,8 @@ export class QuizzesController {
     @Param('id') id: number,
     @Body() answerQuizzDto: AnswerQuizzDto,
   ) {
-    const result = await this.quizzesService.answerQuizz(id, answerQuizzDto);
-    return {
-      code: HttpStatus.OK,
-      message: 'Quiz answered and graded successfully',
-      data: result,
-    };
+    return this.quizzesService.answerQuizz(id, answerQuizzDto);
+ 
   }
 
   @ApiOperation({ summary: 'Retrieve a specific quiz' })
@@ -72,12 +59,8 @@ export class QuizzesController {
   })
   @Get(':id')
   async getQuizz(@Param('id') id: number) {
-    const quizz = await this.quizzesService.getQuizz(id);
-    return {
-      code: HttpStatus.OK,
-      message: 'Quiz retrieved successfully',
-      data: quizz,
-    };
+    return this.quizzesService.getQuizz(id);
+   
   }
 
   @ApiOperation({ summary: 'Delete a specific quiz' })
@@ -87,12 +70,8 @@ export class QuizzesController {
   })
   @Delete(':id')
   async deleteQuizz(@Param('id') id: number) {
-    const data = await this.quizzesService.deleteQuizz(id);
-    return {
-      code: HttpStatus.OK,
-      message: 'Quiz deleted successfully',
-      data: data,
-    };
+    return this.quizzesService.deleteQuizz(id);
+  
   }
 }
 
