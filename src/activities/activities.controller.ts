@@ -26,73 +26,44 @@ export class ActivitiesController {
 
   @Post()
   async create(@Body() activitiy: CreateActivitiesDto) {
-    const activity = await this.activitiesService.create(activitiy);
-    return {
-      code: HttpStatus.CREATED,
-      message: 'Activity created successfully',
-      data: activity,
-    };
+    return this.activitiesService.create(activitiy);
+    
   }
 
   @Get('/:id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
-    const activity = await this.activitiesService.findOne(id);
-    return {
-      code: HttpStatus.OK,
-      message: 'Activity found',
-      data: activity,
-    };
+    return this.activitiesService.findOne(id);
+   
   }
 
   @Get('/course/:course_id')
   async findMany(@Param('course_id', ParseIntPipe) course_id: number) {
-    const activity = await this.activitiesService.findMany(course_id);
-    return {
-      code: HttpStatus.OK,
-      message: 'Activities found',
-      data: activity,
-    };
+    return this.activitiesService.findMany(course_id);
+ 
   }
 
   @Delete('/:id')
   async delete(@Param('id', ParseIntPipe) id: number) {
-    const activity = await this.activitiesService.delete(id);
-    return {
-      code: HttpStatus.OK,
-      message: 'Activity deleted',
-      data: activity,
-    };
+    return this.activitiesService.delete(id);
+
   }
 
   @Put()
   async update(@Body() activity: UpdateActivitiesDto) {
-    const activityUpdated = await this.activitiesService.update(activity);
-    return {
-      code: HttpStatus.OK,
-      message: 'Activity updated',
-      data: activityUpdated,
-    };
+    return this.activitiesService.update(activity);
+   
   }
 
   @Get('/myActivities/:id_user')
   async myActivities(@Param('id_user', ParseIntPipe) idUser: number) {
-    const activities = await this.activitiesService.myActivities(idUser);
-    return {
-      code: HttpStatus.OK,
-      message: 'Activities found',
-      data: activities,
-    };
+    return this.activitiesService.myActivities(idUser);
+
   }
 
   @Get('mine/sent/:id_user')
   async myActivitiesSent(@Param('id_user', ParseIntPipe) id_user: number) {
-    const activitiesSent =
-      await this.activitiesService.myActivitiesSent(id_user);
-    return {
-      code: HttpStatus.OK,
-      message: 'Activities found',
-      data: activitiesSent,
-    };
+    return this.activitiesService.myActivitiesSent(id_user);
+ 
   }
 
   @Get('for/evaluation/:id_activity')
@@ -100,23 +71,14 @@ export class ActivitiesController {
     @Param('id_activity', ParseIntPipe)
     id_activity: number,
   ) {
-    const activities =
-      await this.activitiesService.activitiesForEvaluation(id_activity);
-    return {
-      code: HttpStatus.OK,
-      message: 'Activities found',
-      data: activities,
-    };
+    return this.activitiesService.activitiesForEvaluation(id_activity);
+ 
   }
 
   @Post('send/activity')
   async sendActivity(@Body() activitiy: SendActivityDto) {
-    const activity = await this.activitiesService.sendActivity(activitiy);
-    return {
-      code: HttpStatus.CREATED,
-      message: 'Activity sent successfully',
-      data: activity,
-    };
+    return this.activitiesService.sendActivity(activitiy);
+  
   }
 
   @Get('/send/course/user/:user_id/:course_id')
@@ -124,35 +86,22 @@ export class ActivitiesController {
     @Param('user_id', ParseIntPipe) user_id: number,
     @Param('course_id', ParseIntPipe) course_id: number,
   ) {
-    const activities =
-      await this.activitiesService.activitiesSendForStudenInCourse(
+    return this.activitiesService.activitiesSendForStudenInCourse(
         user_id,
         course_id,
       );
-    return {
-      code: HttpStatus.OK,
-      message: 'Activity found',
-      data: activities,
-    };
+
   }
 
   @Get('find/all')
   async findAll() {
-    const activities = await this.activitiesService.findAll();
-    return {
-      code: HttpStatus.OK,
-      message: 'Activities found',
-      data: activities,
-    };
+    return this.activitiesService.findAll();
+
   }
 
   @Post('assess/activity')
   async assessActivity(@Body() data: AssessActivityDto) {
-    const activity = await this.activitiesService.assessActivity(data);
-    return {
-      code: HttpStatus.CREATED,
-      message: 'Activity evaluated',
-      data: activity,
-    };
+    return this.activitiesService.assessActivity(data);
+  
   }
 }
