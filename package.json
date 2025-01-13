@@ -28,6 +28,7 @@
     "@nestjs/platform-express": "^10.4.7",
     "@nestjs/platform-fastify": "^10.4.7",
     "@nestjs/platform-socket.io": "^10.4.13",
+    "@nestjs/serve-static": "^4.0.2",
     "@nestjs/swagger": "^7.4.2",
     "@nestjs/websockets": "^10.4.13",
     "@prisma/client": "^5.21.1",

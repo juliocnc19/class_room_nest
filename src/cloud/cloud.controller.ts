@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   HttpStatus,
   Post,
@@ -15,18 +16,20 @@ import { ApiTags } from '@nestjs/swagger';
 export class CloudController {
   constructor(private readonly cloudService: CloudService) {}
 
-  @Post('send/file')
+   /**
+   * Upload file (choose Supabase or local)
+   */
+   @Post('send/file')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: multer.memoryStorage(),
     }),
   )
-  async sendActivityFile(@UploadedFile() file: Express.Multer.File) {
-    const fileUpload = await this.cloudService.uploadFile(file);
-    return {
-      code: HttpStatus.OK,
-      message: 'File uploaded',
-      data: fileUpload,
-    };
+  async sendActivityFile(
+    @UploadedFile() file: Express.Multer.File,
+    @Body('useSupabase') useSupabase: boolean = false, // Default to false (local upload)
+  ) {
+    return this.cloudService.uploadFile(file, useSupabase);
   }
+
 }

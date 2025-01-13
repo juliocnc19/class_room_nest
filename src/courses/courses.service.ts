@@ -97,21 +97,37 @@ export class CoursesService implements Courses {
       try {
         const course = await this.prismaService.course.findUnique({
           where: { token: joinUserCourseDto.token },
-          include: { owner: true },
+          include: {
+            owner: true,
+            users: {
+              include: {
+                user: true,
+              },
+            },
+          },
         });
+    
         if (!course) {
           return errorResponse('Curso no encontrado', HttpStatus.NOT_FOUND);
         }
-  
+    
+        const existingEnrollment = course.users.find(
+          (enrollment) => enrollment.userId === joinUserCourseDto.id
+        );
+    
+        if (existingEnrollment) {
+          return errorResponse('El usuario ya está inscrito en este curso', HttpStatus.CONFLICT);
+        }
+    
         const enrollment = await this.prismaService.courseEnrollment.create({
           data: { userId: joinUserCourseDto.id, courseId: course.id },
         });
-  
+    
         const user = await this.prismaService.user.findUnique({ where: { id: joinUserCourseDto.id } });
         if (!user) {
           return errorResponse('Usuario no encontrado', HttpStatus.NOT_FOUND);
         }
-  
+    
         if (course.owner.firebaseToken) {
           await this.notificationsService.sendNotification({
             tokens: [course.owner.firebaseToken],
@@ -120,8 +136,16 @@ export class CoursesService implements Courses {
             data: { courseId: course.id.toString(), userId: user.id.toString() },
           });
         }
-  
-        return successResponse(enrollment, 'Usuario añadido al curso exitosamente');
+    
+        const updatedCourse = await this.prismaService.course.findUnique({
+          where: { id: course.id },
+          // include: {
+          //   users: { include: { user: true } },
+          //   area: { select: { area: true } },
+          // },
+        });
+    
+        return successResponse(updatedCourse, 'Usuario añadido al curso exitosamente');
       } catch (error) {
         return errorResponse('Error al unirse al curso', HttpStatus.INTERNAL_SERVER_ERROR, error);
       }

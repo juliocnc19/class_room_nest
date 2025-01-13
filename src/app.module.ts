@@ -8,6 +8,8 @@ import { PostModule } from './post/post.module';
 import { QuizzesModule } from './quizzes/quizzes.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ChatModule } from './chat/chat.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -20,6 +22,10 @@ import { ChatModule } from './chat/chat.module';
     QuizzesModule,
     NotificationsModule,
     ChatModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/files', // This creates the public route
+    }),
   ],
   providers: [],
 })
