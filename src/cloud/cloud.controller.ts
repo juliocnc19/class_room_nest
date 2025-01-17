@@ -27,7 +27,7 @@ export class CloudController {
   )
   async sendActivityFile(
     @UploadedFile() file: Express.Multer.File,
-    @Body('useSupabase') useSupabase: boolean = false, // Default to false (local upload)
+    @Body('useSupabase') useSupabase: string = 'false', // Default to false (local upload)
   ) {
     return this.cloudService.uploadFile(file, useSupabase);
   }

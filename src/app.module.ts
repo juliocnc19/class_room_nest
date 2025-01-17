@@ -25,6 +25,12 @@ import { join } from 'path';
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads'),
       serveRoot: '/files', // This creates the public route
+      serveStaticOptions: {
+        setHeaders: (res) => {
+          res.setHeader('Access-Control-Allow-Origin', '*'); // Allow access from all origins
+        },
+      }
+      
     }),
   ],
   providers: [],

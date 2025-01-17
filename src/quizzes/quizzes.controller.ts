@@ -11,6 +11,7 @@ import { QuizzesService } from './quizzes.service';
 import { CreateQuizzDto, CreateQuizzDto2 } from './dto/create-quiz.dto';
 import { AnswerQuizzDto } from './dto/answer-quiz.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { errorResponse } from 'src/utils/responseHttpUtils';
 
 @ApiTags('Quizzes') // Groups endpoints under "Quizzes" in Swagger
 @Controller('quizzes')
@@ -44,13 +45,24 @@ export class QuizzesController {
     description: 'Quiz answered and graded successfully',
   })
   @Post(':id/answer')
-  async answer(
-    @Param('id') id: number,
-    @Body() answerQuizzDto: AnswerQuizzDto,
-  ) {
-    return this.quizzesService.answerQuizz(id, answerQuizzDto);
- 
+async answer(
+  @Param('id') id: string, // Receive `id` as a string to ensure it's parsed correctly
+  @Body() answerQuizzDto: AnswerQuizzDto,
+) {
+  const quizzId = parseInt(id, 10); // Convert the `id` to a number explicitly
+  if (isNaN(quizzId)) {
+    return errorResponse('El ID del cuestionario debe ser un número', HttpStatus.BAD_REQUEST);
   }
+  return this.quizzesService.answerQuizz(quizzId, answerQuizzDto);
+}
+  // @Post(':id/answer')
+  // async answer(
+  //   @Param('id') id: number,
+  //   @Body() answerQuizzDto: AnswerQuizzDto,
+  // ) {
+  //   return this.quizzesService.answerQuizz(id, answerQuizzDto);
+ 
+  // }
 
   @ApiOperation({ summary: 'Retrieve a specific quiz' })
   @ApiResponse({

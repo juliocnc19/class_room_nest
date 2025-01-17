@@ -21,14 +21,18 @@ export class CloudService {
    */
   async uploadFile(
     file: Express.Multer.File,
-    useSupabase: boolean,
+    useSupabase: string = 'false',
   ): Promise<any> {
+    console.log("entro");
+    
     try {
+      const useSupabaseBool = useSupabase === 'true';
+
       if (!file) {
         return errorResponse('No file provided', HttpStatus.BAD_REQUEST);
       }
 
-      if (useSupabase) {
+      if (useSupabaseBool) {
         return await this.uploadToSupabase(file);
       } else {
         return await this.uploadFileLocally(file);

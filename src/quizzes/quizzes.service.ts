@@ -56,15 +56,17 @@ export class QuizzesService {
         questions,
         email,
       } = data;
-
+  
+      // Check if the course exists
       const course = await this.prisma.course.findUnique({
         where: { id: courseId },
       });
-
+  
       if (!course) {
         return errorResponse('El curso no existe', HttpStatus.NOT_FOUND);
       }
-
+  
+      // Create the associated activity
       const activity = await this.prisma.activities.create({
         data: {
           title,
@@ -79,31 +81,46 @@ export class QuizzesService {
           course: { connect: { id: courseId } },
         },
       });
-
+  
+      // Create questions and options
+      const questionsData = questions.map((question) => ({
+        text: question.text,
+        options: question.options.map((option) => ({ text: option })),
+        correctAnswerIndex: question.answer,
+      }));
+  
       const quizz = await this.prisma.quizz.create({
         data: {
           activity_id: activity.id,
           question: {
-            create: questions.map((question) => ({
-              text: question.text,
-              answer: question.answer,
-              options: {
-                create: question.options.map((option) => ({ text: option })),
-              },
-            })),
+            create: questionsData.map((question) => {
+              const options = question.options.map((opt, index) => ({
+                text: opt.text,
+                isCorrect: index === question.correctAnswerIndex,
+              }));
+  
+              return {
+                text: question.text,
+                options: {
+                  create: options,
+                },
+                answer: question.correctAnswerIndex + 1, // Save correct `optionId`
+              };
+            }),
           },
         },
       });
-
+  
+      // Notify users in the course about the quiz
       const users = await this.prisma.courseEnrollment.findMany({
         where: { courseId },
         include: { user: true },
       });
-
+  
       const tokens = users
         .map((enrollment) => enrollment.user.firebaseToken)
         .filter((token) => token);
-
+  
       if (tokens.length > 0) {
         await this.notificationsService.sendNotification({
           tokens,
@@ -116,7 +133,8 @@ export class QuizzesService {
           },
         });
       }
-
+  
+      // Fetch the complete quiz for response
       const completeQuiz = await this.prisma.quizz.findUnique({
         where: { id: quizz.id },
         include: {
@@ -126,28 +144,144 @@ export class QuizzesService {
           },
         },
       });
-
+  
       if (!completeQuiz) {
         return errorResponse(
           'No se encontró el cuestionario después de su creación',
           HttpStatus.NOT_FOUND,
         );
       }
-
-      return successResponse(completeQuiz, 'Cuestionario creado exitosamente con detalles completos');
+  
+      return successResponse(
+        completeQuiz,
+        'Cuestionario creado exitosamente con detalles completos',
+      );
     } catch (error) {
+      console.error('Error creating quiz:', error); // Log the error
       return errorResponse(
         'Error al crear el cuestionario',
         HttpStatus.INTERNAL_SERVER_ERROR,
-        error,
+        error.message,
       );
     }
   }
+  
+  // async createQuizz2(data: CreateQuizzDto2): Promise<any> {
+  //   try {
+  //     const {
+  //       title,
+  //       description,
+  //       grade,
+  //       startDate,
+  //       endDate,
+  //       digital,
+  //       statusId,
+  //       courseId,
+  //       questions,
+  //       email,
+  //     } = data;
 
-  async answerQuizz(quizzId: number, data: AnswerQuizzDto) {
+  //     const course = await this.prisma.course.findUnique({
+  //       where: { id: courseId },
+  //     });
+
+  //     if (!course) {
+  //       return errorResponse('El curso no existe', HttpStatus.NOT_FOUND);
+  //     }
+
+  //     const activity = await this.prisma.activities.create({
+  //       data: {
+  //         title,
+  //         description,
+  //         grade,
+  //         start_date: startDate,
+  //         end_date: endDate,
+  //         email,
+  //         digital,
+  //         isQuizz: true,
+  //         status: { connect: { id: statusId } },
+  //         course: { connect: { id: courseId } },
+  //       },
+  //     });
+
+  //     const quizz = await this.prisma.quizz.create({
+  //       data: {
+  //         activity_id: activity.id,
+  //         question: {
+  //           create: questions.map((question) => ({
+  //             text: question.text,
+  //             answer: question.answer,
+  //             options: {
+  //               create: question.options.map((option) => ({ text: option })),
+  //             },
+  //           })),
+  //         },
+  //       },
+  //     });
+
+  //     const users = await this.prisma.courseEnrollment.findMany({
+  //       where: { courseId },
+  //       include: { user: true },
+  //     });
+
+  //     const tokens = users
+  //       .map((enrollment) => enrollment.user.firebaseToken)
+  //       .filter((token) => token);
+
+  //     if (tokens.length > 0) {
+  //       await this.notificationsService.sendNotification({
+  //         tokens,
+  //         title: `Nuevo cuestionario en el curso ${course.title}`,
+  //         body: `${title}: ${description}`,
+  //         data: {
+  //           courseId: courseId.toString(),
+  //           activityId: activity.id.toString(),
+  //           quizId: quizz.id.toString(),
+  //         },
+  //       });
+  //     }
+
+  //     const completeQuiz = await this.prisma.quizz.findUnique({
+  //       where: { id: quizz.id },
+  //       include: {
+  //         activity: true,
+  //         question: {
+  //           include: { options: true },
+  //         },
+  //       },
+  //     });
+
+  //     if (!completeQuiz) {
+  //       return errorResponse(
+  //         'No se encontró el cuestionario después de su creación',
+  //         HttpStatus.NOT_FOUND,
+  //       );
+  //     }
+
+  //     return successResponse(completeQuiz, 'Cuestionario creado exitosamente con detalles completos');
+  //   } catch (error) {
+  //     return errorResponse(
+  //       'Error al crear el cuestionario',
+  //       HttpStatus.INTERNAL_SERVER_ERROR,
+  //       error,
+  //     );
+  //   }
+  // }
+
+  async answerQuizz(quizzId: number, data: AnswerQuizzDto): Promise<any> {
     try {
       const { userId, answers } = data;
-
+  
+      // Validate the user
+      const userExists = await this.prisma.user.findUnique({
+        where: { id: userId },
+      });
+  
+      if (!userExists) {
+        return errorResponse('El usuario no existe', HttpStatus.BAD_REQUEST);
+      }
+  
+      // Fetch the quiz with questions and correct answers
       const quizz = await this.prisma.quizz.findUnique({
         where: { id: quizzId },
         include: {
@@ -157,25 +291,28 @@ export class QuizzesService {
           activity: true,
         },
       });
-
+  
       if (!quizz) {
         return errorResponse('El cuestionario no existe', HttpStatus.NOT_FOUND);
       }
-
+  
       const totalQuestions = quizz.question.length;
       let correctAnswers = 0;
-
+  
+      // Validate each user's answer against the correct answer
       quizz.question.forEach((question) => {
-        const userAnswer = answers.find(
-          (ans) => ans.questionId === question.id,
-        )?.optionId;
+        const userAnswer = answers.find((ans) => ans.questionId === question.id)?.optionId;
+  
+        // Check if the user's selected option matches the correct option ID
         if (userAnswer === question.answer) {
           correctAnswers++;
         }
       });
-
+  
+      // Calculate the grade
       const grade = (correctAnswers / totalQuestions) * 100;
-
+  
+      // Create the quiz submission with the answers
       const submission = await this.prisma.quizzSent.create({
         data: {
           quizzId,
@@ -187,8 +324,12 @@ export class QuizzesService {
             })),
           },
         },
+        include: {
+          answer: true, // Include the submitted answers in the result
+        },
       });
-
+  
+      // If the quiz is associated with an activity, update the activity status
       if (quizz.activity) {
         await this.prisma.activitiesSent.create({
           data: {
@@ -199,16 +340,131 @@ export class QuizzesService {
           },
         });
       }
-
-      return successResponse({ grade, submission }, 'Respuestas enviadas exitosamente');
+  
+      // Return the successful response
+      return successResponse(
+        {
+          grade,
+          submission: {
+            id: submission.id,
+            quizzId,
+            userId,
+            grade: grade.toFixed(2), // Convert grade to a string for consistency
+            create_date: submission.create_date.toISOString(),
+            answers: submission.answer.map((ans) => ({
+              id: ans.id,
+              optionId: ans.optionId,
+            })),
+          },
+          quizz: {
+            id: quizzId,
+            activityId: quizz.activity.id,
+            activity: {
+              id: quizz.activity.id,
+              courseId: quizz.activity.course_id,
+              title: quizz.activity.title,
+              description: quizz.activity.description,
+              grade: quizz.activity.grade.toString(),
+              startDate: quizz.activity.start_date,
+              endDate: quizz.activity.end_date,
+              email: quizz.activity.email,
+              digital: quizz.activity.digital,
+              isQuizz: quizz.activity.isQuizz,
+              statusId: quizz.activity.status_id,
+            },
+            question: quizz.question.map((q) => ({
+              id: q.id,
+              quizzId: q.quizzId,
+              text: q.text,
+              answer: q.answer, // Include the correct answer for debugging (optional)
+              options: q.options.map((opt) => ({
+                id: opt.id,
+                text: opt.text,
+                questionId: opt.questionId,
+              })),
+            })),
+            title: quizz.activity.title,
+            description: quizz.activity.description,
+            totalQuestions: quizz.question.length,
+          },
+        },
+        'Respuestas enviadas exitosamente',
+      );
     } catch (error) {
+      console.error('Error submitting quiz:', error); // Log error for debugging
       return errorResponse(
         'Error al enviar las respuestas del cuestionario',
         HttpStatus.INTERNAL_SERVER_ERROR,
-        error,
+        error.message,
       );
     }
   }
+
+  // async answerQuizz(quizzId: number, data: AnswerQuizzDto) {
+  //   try {
+  //     const { userId, answers } = data;
+
+  //     const quizz = await this.prisma.quizz.findUnique({
+  //       where: { id: quizzId },
+  //       include: {
+  //         question: {
+  //           include: { options: true },
+  //         },
+  //         activity: true,
+  //       },
+  //     });
+
+  //     if (!quizz) {
+  //       return errorResponse('El cuestionario no existe', HttpStatus.NOT_FOUND);
+  //     }
+
+  //     const totalQuestions = quizz.question.length;
+  //     let correctAnswers = 0;
+
+  //     quizz.question.forEach((question) => {
+  //       const userAnswer = answers.find(
+  //         (ans) => ans.questionId === question.id,
+  //       )?.optionId;
+  //       if (userAnswer === question.answer) {
+  //         correctAnswers++;
+  //       }
+  //     });
+
+  //     const grade = (correctAnswers / totalQuestions) * 100;
+
+  //     const submission = await this.prisma.quizzSent.create({
+  //       data: {
+  //         quizzId,
+  //         userId,
+  //         grade,
+  //         answer: {
+  //           create: answers.map((answer) => ({
+  //             optionId: answer.optionId,
+  //           })),
+  //         },
+  //       },
+  //     });
+
+  //     if (quizz.activity) {
+  //       await this.prisma.activitiesSent.create({
+  //         data: {
+  //           activity_id: quizz.activity.id,
+  //           user_id: userId,
+  //           grade,
+  //           message: `Cuestionario respondido y calificado: ${grade.toFixed(2)}%`,
+  //         },
+  //       });
+  //     }
+
+  //     return successResponse({ grade, submission }, 'Respuestas enviadas exitosamente');
+  //   } catch (error) {
+  //     return errorResponse(
+  //       'Error al enviar las respuestas del cuestionario',
+  //       HttpStatus.INTERNAL_SERVER_ERROR,
+  //       error,
+  //     );
+  //   }
+  // }
 
   async getQuizz(id: number) {
     try {
