@@ -1,4 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
@@ -10,12 +11,29 @@ export class CloudService {
   private readonly bucketName = 'class_room_documents';
   private readonly uploadFolder = 'uploads'; // Local folder for storing files
 
-  constructor() {
-    this.supabase = createClient(
-      process.env.SUPABASE_URL,
-      process.env.SUPABASE_KEY,
-    );
+
+  constructor(private configService: ConfigService) {
+    const supabaseUrl = this.configService.get<string>('SUPABASE_URL');
+    const supabaseKey = this.configService.get<string>('SUPABASE_KEY');
+
+    console.log('SUPABASE_URL:', supabaseUrl);
+    console.log('SUPABASE_KEY:', supabaseKey);
+
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('SUPABASE_URL or SUPABASE_KEY is missing in the environment variables');
+    }
+
+    this.supabase = createClient(supabaseUrl, supabaseKey);
   }
+
+  // constructor() {
+  //   this.supabase = createClient(
+  //     process.env.SUPABASE_URL,
+  //     process.env.SUPABASE_KEY,
+  //   );
+  // }
+
+
   /**
    * Upload file (decides between local or Supabase based on useSupabase flag)
    */

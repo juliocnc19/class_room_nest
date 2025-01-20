@@ -10,6 +10,8 @@ import {
 } from './dto/activities.dto';
 import { NotificationsService } from 'src/notifications/notifications.service';
 import { ApiResponse, errorResponse, successResponse } from 'src/utils/responseHttpUtils';
+import path from 'path';
+import { unlink } from 'fs';
 
 @Injectable()
 export class ActivitiesService implements Activitiy {
@@ -199,15 +201,84 @@ export class ActivitiesService implements Activitiy {
     }
   }
 
-  async sendActivity(activity: SendActivityDto) {
+  async sendActivity(activity: SendActivityDto): Promise<any> {
+    let uploadedFilePath: string | null = null; // Store the file path temporarily
+
     try {
-      const sentActivity = await this.prismaService.activitiesSent.create({
-        data: activity,
+      // 1. Handle the file upload with Multer (assuming file is uploaded correctly)
+      const file = activity.document;  // Assuming it's the file path or filename after Multer upload
+
+      // Ensure the document exists
+      if (!file) {
+        return errorResponse('Se debe adjuntar un documento', HttpStatus.BAD_REQUEST);
+      }
+
+      // Resolve the path of the uploaded file
+      uploadedFilePath = path.resolve('uploads', file);
+
+      // 2. Validate if the user exists
+      const userExists = await this.prismaService.user.findUnique({
+        where: { id: activity.user_id },
       });
 
+      if (!userExists) {
+        return errorResponse('El usuario no existe', HttpStatus.BAD_REQUEST);
+      }
+
+      // 3. Validate if the activity exists
+      const activityExists = await this.prismaService.activities.findUnique({
+        where: { id: activity.activity_id },
+      });
+
+      if (!activityExists) {
+        return errorResponse('La actividad no existe', HttpStatus.NOT_FOUND);
+      }
+
+      // 4. Validate if the user has already submitted this activity
+      const alreadySent = await this.prismaService.activitiesSent.findFirst({
+        where: {
+          activity_id: activity.activity_id,
+          user_id: activity.user_id,
+        },
+      });
+
+      if (alreadySent) {
+        return errorResponse(
+          'Esta actividad ya ha sido enviada por el usuario',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      // 5. Create the record in activitiesSent
+      const sentActivity = await this.prismaService.activitiesSent.create({
+        data: {
+          ...activity,
+          document: uploadedFilePath, // Store the file path in the database or wherever it's needed
+        },
+      });
+
+      // 6. Return the success response with the sent activity
       return successResponse(sentActivity, 'Actividad enviada exitosamente');
     } catch (error) {
-      return errorResponse('Error al enviar la actividad', HttpStatus.INTERNAL_SERVER_ERROR, error);
+      // 7. If any error occurs, log the error and attempt cleanup
+      console.error('Error during activity submission:', error);
+
+      // Cleanup uploaded file if there was any file uploaded
+      if (uploadedFilePath) {
+        try {
+          unlink(uploadedFilePath, (err) => {
+            if (err) {
+              console.error('Failed to delete uploaded file:', err);
+            } else {
+              console.log('File deleted successfully');
+            }
+          });
+        } catch (deleteError) {
+          console.error('Error deleting file during cleanup:', deleteError);
+        }
+      }
+
+      return errorResponse('Error al enviar la actividad', HttpStatus.INTERNAL_SERVER_ERROR, error.message);
     }
   }
 

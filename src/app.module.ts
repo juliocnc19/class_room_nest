@@ -10,9 +10,15 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { ChatModule } from './chat/chat.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
+
+    ConfigModule.forRoot({
+      isGlobal: true, // Make sure config is globally available
+    }),
+
     UsersModule,
     PrismaModule,
     CoursesModule,
@@ -35,4 +41,9 @@ import { join } from 'path';
   ],
   providers: [],
 })
-export class AppModule {}
+export class AppModule {
+  constructor(private configService: ConfigService) {
+    console.log('Loaded SUPABASE_URL:', configService.get('SUPABASE_URL'));
+    console.log('Loaded SUPABASE_KEY:', configService.get('SUPABASE_KEY'));
+  }
+}
