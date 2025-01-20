@@ -85,8 +85,10 @@ export class QuizzesService {
       // Create questions and options
       const questionsData = questions.map((question) => ({
         text: question.text,
-        options: question.options.map((option) => ({ text: option })),
-        correctAnswerIndex: question.answer,
+        options: question.options.map((option, index) => ({
+          text: option,
+        })),
+        answer: question.answer, // Store the index of the correct answer
       }));
   
       const quizz = await this.prisma.quizz.create({
@@ -96,7 +98,6 @@ export class QuizzesService {
             create: questionsData.map((question) => {
               const options = question.options.map((opt, index) => ({
                 text: opt.text,
-                isCorrect: index === question.correctAnswerIndex,
               }));
   
               return {
@@ -104,7 +105,7 @@ export class QuizzesService {
                 options: {
                   create: options,
                 },
-                answer: question.correctAnswerIndex + 1, // Save correct `optionId`
+                answer: question.answer + 1, // Store the correct `optionId` (answer + 1)
               };
             }),
           },
@@ -165,6 +166,7 @@ export class QuizzesService {
       );
     }
   }
+  
   
   // async createQuizz2(data: CreateQuizzDto2): Promise<any> {
   //   try {
