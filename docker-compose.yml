@@ -27,7 +27,7 @@ services:
       db_class_room:
         condition: service_healthy
     restart: always
-    command: sh -c "npx prisma migrate deploy && npm run start"
+    command: sh -c "npx prisma migrate deploy && npm run seed && npm run start"
     volumes:
       - app_data_class_room:/app
 
