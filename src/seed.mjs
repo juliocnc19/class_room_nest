@@ -98,6 +98,30 @@ async function main() {
     },
   });
 
+  const roleStudent = await prisma.role.upsert({
+    where: { role: 'student' },
+    update: {},
+    create: {
+      role: 'student',
+    },
+  });
+
+  const roleAdmin = await prisma.role.upsert({
+    where: { role: 'admin' },
+    update: {},
+    create: {
+      role: 'admin',
+    },
+  });
+
+  const roleTeacher = await prisma.role.upsert({
+    where: { role: 'teacher' },
+    update: {},
+    create: {
+      role: 'teacher',
+    },
+  });
+
   console.log('Genders seeding completed:', {
     genderMan,
     genderWoman,
@@ -111,6 +135,9 @@ async function main() {
     areaLanguage,
     areaCoding,
     areaOther,
+    roleStudent,
+    roleAdmin,
+    roleTeacher,
   });
 }
 
