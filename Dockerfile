@@ -1,24 +1,30 @@
-# Use the official Node.js image as the base image
+# Usa una imagen base con Node.js
 FROM node:22
 
-# Set the working directory inside the container
-WORKDIR /usr/src/app
+# Establecer el directorio de trabajo dentro del contenedor
+WORKDIR /app
 
-# Copy package.json and package-lock.json to the working directory
+COPY .env .env
+
+# Copiar los archivos necesarios para instalar dependencias
 COPY package*.json ./
 
-# Install the application dependencies
+# Instalar las dependencias
 RUN npm install
 
-# Copy the rest of the application files
+# Copiar la carpeta prisma al contenedor antes de ejecutar las migraciones
+COPY prisma ./prisma
+
+# Ejecutar las migraciones de Prisma y generar el cliente
+RUN npx prisma generate
+
+# Copiar el resto de los archivos de la aplicación
 COPY . .
 
-# Build the NestJS application
+# Construir la aplicación NestJS
 RUN npm run build
 
-# Expose the application port
+# Exponer el puerto de la aplicación
 EXPOSE 3000
 
-# Command to run the application
-CMD ["npm", "run", "start"]
 
