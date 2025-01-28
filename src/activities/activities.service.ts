@@ -128,16 +128,81 @@ export class ActivitiesService implements Activitiy {
   }
 
   async delete(id: number) {
+    const prisma = this.prismaService;
     try {
-      const activity = await this.prismaService.activities.delete({
-        where: { id },
+      await prisma.$transaction(async (transaction) => {
+        // Delete related entities explicitly
+        await transaction.answer.deleteMany({
+          where: {
+            QuizzSent: {
+              quizz: {
+                activity_id: id,
+              },
+            },
+          },
+        });
+  
+        await transaction.quizzSent.deleteMany({
+          where: {
+            quizz: {
+              activity_id: id,
+            },
+          },
+        });
+  
+        await transaction.option.deleteMany({
+          where: {
+            question: {
+              Quizz: {
+                activity_id: id,
+              },
+            },
+          },
+        });
+  
+        await transaction.questions.deleteMany({
+          where: {
+            Quizz: {
+              activity_id: id,
+            },
+          },
+        });
+  
+        await transaction.quizz.deleteMany({
+          where: { activity_id: id },
+        });
+  
+        await transaction.activitiesSent.deleteMany({
+          where: { activity_id: id },
+        });
+  
+        await transaction.post.deleteMany({
+          where: { activityId: id },
+        });
+  
+        // Delete the activity itself
+        await transaction.activities.delete({
+          where: { id },
+        });
       });
-
-      return successResponse(activity, 'Actividad eliminada exitosamente');
+  
+      return successResponse(null, 'Actividad eliminada exitosamente');
     } catch (error) {
       return errorResponse('Error al eliminar la actividad', HttpStatus.INTERNAL_SERVER_ERROR, error);
     }
   }
+
+  // async delete(id: number) {
+  //   try {
+  //     const activity = await this.prismaService.activities.delete({
+  //       where: { id },
+  //     });
+
+  //     return successResponse(activity, 'Actividad eliminada exitosamente');
+  //   } catch (error) {
+  //     return errorResponse('Error al eliminar la actividad', HttpStatus.INTERNAL_SERVER_ERROR, error);
+  //   }
+  // }
 
   async update(activities: UpdateActivitiesDto) {
     try {

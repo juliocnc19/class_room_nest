@@ -48,15 +48,65 @@ export class CoursesService implements Courses {
         return errorResponse('Error al obtener los cursos', HttpStatus.INTERNAL_SERVER_ERROR, error);
       }
     }
-  
+
     async delete(id: number) {
+      const prisma = this.prismaService;
       try {
-        const deletedCourse = await this.prismaService.course.delete({ where: { id } });
-        return successResponse(deletedCourse, 'Curso eliminado exitosamente');
+        await prisma.$transaction(async (transaction) => {
+          // Delete related entities explicitly
+          await transaction.activitiesSent.deleteMany({
+            where: {
+              activity: {
+                course_id: id,
+              },
+            },
+          });
+    
+          await transaction.activities.deleteMany({
+            where: {
+              course_id: id,
+            },
+          });
+    
+          await transaction.courseEnrollment.deleteMany({
+            where: {
+              courseId: id,
+            },
+          });
+    
+          await transaction.post.deleteMany({
+            where: {
+              courseId: id,
+            },
+          });
+    
+          await transaction.chatRoom.deleteMany({
+            where: {
+              courseId: id,
+            },
+          });
+    
+          // Delete the course
+          await transaction.course.delete({
+            where: { id },
+          });
+        });
+    
+        return successResponse(null, 'Curso eliminado exitosamente');
       } catch (error) {
         return errorResponse('Error al eliminar el curso', HttpStatus.INTERNAL_SERVER_ERROR, error);
       }
     }
+    
+  
+    // async delete(id: number) {
+    //   try {
+    //     const deletedCourse = await this.prismaService.course.delete({ where: { id } });
+    //     return successResponse(deletedCourse, 'Curso eliminado exitosamente');
+    //   } catch (error) {
+    //     return errorResponse('Error al eliminar el curso', HttpStatus.INTERNAL_SERVER_ERROR, error);
+    //   }
+    // }
   
     async update(updateCourseDto: UpdateCourseDto) {
       try {

@@ -97,9 +97,21 @@ export class PostService implements Post {
       }
     }
   
+    // async deletePost(id: number): Promise<ApiResponse<PostPrisma>> {
+    //   try {
+    //     const deletedPost = await this.prismaService.post.delete({ where: { id } });
+    //     return successResponse(deletedPost, 'Publicación eliminada exitosamente');
+    //   } catch (error) {
+    //     return errorResponse('Error al eliminar la publicación', HttpStatus.INTERNAL_SERVER_ERROR, error);
+    //   }
+    // }
+
     async deletePost(id: number): Promise<ApiResponse<PostPrisma>> {
       try {
-        const deletedPost = await this.prismaService.post.delete({ where: { id } });
+        const deletedPost = await this.prismaService.post.delete({
+          where: { id },
+        });
+    
         return successResponse(deletedPost, 'Publicación eliminada exitosamente');
       } catch (error) {
         return errorResponse('Error al eliminar la publicación', HttpStatus.INTERNAL_SERVER_ERROR, error);
