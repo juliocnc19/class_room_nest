@@ -9,6 +9,7 @@ export function successResponse<T>(data: T, message = 'Success'): ApiResponse<T>
 }
   
 export function errorResponse<T>(message: string, code: number, data: T = null): ApiResponse<T> {
+  
   return {
     code,
     message,

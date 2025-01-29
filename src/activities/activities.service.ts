@@ -10,8 +10,9 @@ import {
 } from './dto/activities.dto';
 import { NotificationsService } from 'src/notifications/notifications.service';
 import { ApiResponse, errorResponse, successResponse } from 'src/utils/responseHttpUtils';
-import path from 'path';
+import * as path from 'path';
 import { unlink } from 'fs';
+import { log } from 'console';
 
 @Injectable()
 export class ActivitiesService implements Activitiy {
@@ -186,7 +187,7 @@ export class ActivitiesService implements Activitiy {
         });
       });
   
-      return successResponse(null, 'Actividad eliminada exitosamente');
+      return successResponse({eliminado: true}, 'Actividad eliminada exitosamente');
     } catch (error) {
       return errorResponse('Error al eliminar la actividad', HttpStatus.INTERNAL_SERVER_ERROR, error);
     }
@@ -374,6 +375,8 @@ export class ActivitiesService implements Activitiy {
   }
 
   async assessActivity(data: AssessActivityDto) {
+    console.log("data", data);
+    
     try {
       const assessedActivity = await this.prismaService.activitiesSent.update({
         where: { id: data.id },

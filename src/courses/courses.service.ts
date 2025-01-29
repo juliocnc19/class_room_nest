@@ -92,7 +92,7 @@ export class CoursesService implements Courses {
           });
         });
     
-        return successResponse(null, 'Curso eliminado exitosamente');
+        return successResponse({eliminado: true}, 'Curso eliminado exitosamente');
       } catch (error) {
         return errorResponse('Error al eliminar el curso', HttpStatus.INTERNAL_SERVER_ERROR, error);
       }

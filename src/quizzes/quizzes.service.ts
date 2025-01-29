@@ -349,6 +349,7 @@ export class QuizzesService {
             include: { options: true },
           },
           activity: true,
+          
         },
       });
   
