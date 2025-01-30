@@ -17,21 +17,40 @@ import { log } from 'console';
 @Injectable()
 export class ActivitiesService implements Activitiy {
   constructor(private readonly prismaService: PrismaService, private notificationsService: NotificationsService) {}
+  // async activitiesSendForStudenInCourse(user_id: number, course_id: number): Promise<ApiResponse<ActivitiesSent[]>> {
+
+  //     try {
+  //       const activities = await this.prismaService.activitiesSent.findMany({
+  //         where: {
+  //           AND: [{ user_id: user_id }, { activity: { course_id: course_id } }],
+  //         },
+  //         include: { activity: true },
+  //       });
+        
+  //       console.log("Retrieved activities:", activities);
+
+  //     return successResponse(activities, 'Actividades enviadas para el estudiante obtenidas exitosamente');
+  //   } catch (e) {
+  
+  //     return errorResponse('Error al obtener actividades enviadas para el estudiante', HttpStatus.INTERNAL_SERVER_ERROR, e);
+  //   }
+  // }
+
   async activitiesSendForStudenInCourse(user_id: number, course_id: number): Promise<ApiResponse<ActivitiesSent[]>> {
 
-      try {
-      const activities = await this.prismaService.activitiesSent.findMany({
-        where: {
-          AND: [{ user_id: user_id }, { activity: { course_id: course_id } }],
-        },
-      });
+    try {
+    const activities = await this.prismaService.activitiesSent.findMany({
+      where: {
+        AND: [{ user_id: user_id }, { activity: { course_id: course_id } }],
+      },
+    });
 
-      return successResponse(activities, 'Actividades enviadas para el estudiante obtenidas exitosamente');
-    } catch (e) {
-  
-      return errorResponse('Error al obtener actividades enviadas para el estudiante', HttpStatus.INTERNAL_SERVER_ERROR, e);
-    }
+    return successResponse(activities, 'Actividades enviadas para el estudiante obtenidas exitosamente');
+  } catch (e) {
+
+    return errorResponse('Error al obtener actividades enviadas para el estudiante', HttpStatus.INTERNAL_SERVER_ERROR, e);
   }
+}
 
 
   async create(activity: CreateActivitiesDto) {
@@ -375,14 +394,27 @@ export class ActivitiesService implements Activitiy {
   }
 
   async assessActivity(data: AssessActivityDto) {
-    console.log("data", data);
-    
+    console.log("Assessing activity with ID:", data.id);
+  
     try {
+      // Fetch the record to ensure we're updating the correct entry
+      const existingActivity = await this.prismaService.activitiesSent.findUnique({
+        where: { id: data.id },
+      });
+  
+      if (!existingActivity) {
+        return errorResponse(`No se encontró la actividad con id ${data.id}`, HttpStatus.NOT_FOUND);
+      }
+  
+      console.log("Existing activity:", existingActivity);
+  
       const assessedActivity = await this.prismaService.activitiesSent.update({
         where: { id: data.id },
         data: { grade: data.grade },
       });
-
+  
+      console.log("Updated activity:", assessedActivity);
+  
       return successResponse(assessedActivity, 'Actividad evaluada exitosamente');
     } catch (error) {
       return errorResponse('Error al evaluar la actividad', HttpStatus.INTERNAL_SERVER_ERROR, error);

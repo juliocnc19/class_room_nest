@@ -40,47 +40,61 @@ export class CloudService {
   async uploadFile(
     file: Express.Multer.File,
     useSupabase: string = 'false',
-  ): Promise<any> {
-    console.log("entro");
-    
+): Promise<any> {
+    console.log("🚀 File upload started...");
+    console.log("Received file:", file ? file.originalname : "NO FILE RECEIVED");
+    console.log("File size:", file?.size);
+    console.log("Use Supabase:", useSupabase);
+
     try {
-      const useSupabaseBool = useSupabase === 'true';
+        const useSupabaseBool = useSupabase === 'true';
 
-      if (!file) {
-        return errorResponse('No file provided', HttpStatus.BAD_REQUEST);
-      }
+        if (!file) {
+            console.error("❌ No file received!");
+            return errorResponse('No file provided', HttpStatus.BAD_REQUEST);
+        }
 
-      if (useSupabaseBool) {
-        return await this.uploadToSupabase(file);
-      } else {
-        return await this.uploadFileLocally(file);
-      }
+        if (useSupabaseBool) {
+            console.log("🟢 Uploading to Supabase...");
+            return await this.uploadToSupabase(file);
+        } else {
+            console.log("🟡 Uploading Locally...");
+            return await this.uploadFileLocally(file);
+        }
     } catch (error) {
-      return errorResponse('Error during file upload', HttpStatus.INTERNAL_SERVER_ERROR, error);
+        console.error("❌ Error in uploadFile:", error);
+        return errorResponse('Error during file upload', HttpStatus.INTERNAL_SERVER_ERROR, error);
     }
-  }
+}
 
   /**
    * Upload file locally
-   */
-  private async uploadFileLocally(file: Express.Multer.File): Promise<any> {
+   */private async uploadFileLocally(file: Express.Multer.File): Promise<any> {
     try {
+      console.log("🟡 Saving file locally...");
+      console.log("File Name:", file.originalname);
+      console.log("File Size:", file.size);
+      console.log("File Type:", file.mimetype);
+
       const uploadDir = join(__dirname, '..', '..', this.uploadFolder);
       if (!existsSync(uploadDir)) {
-        mkdirSync(uploadDir, { recursive: true });
+          console.log("📂 Creating upload directory:", uploadDir);
+          mkdirSync(uploadDir, { recursive: true });
       }
 
       const filePath = `${uploadDir}/${file.originalname}`;
       writeFileSync(filePath, file.buffer);
+      console.log("✅ File saved locally:", filePath);
 
       return successResponse(
-        { path: `/files/${file.originalname}`, fullPath: `http://localhost:3000/files/${file.originalname}` },
-        'File uploaded locally',
+          { path: `/files/${file.originalname}`, fullPath: `http://localhost:3000/files/${file.originalname}` },
+          'File uploaded locally',
       );
-    } catch (error) {
+  } catch (error) {
+      console.error("❌ Error in uploadFileLocally:", error);
       return errorResponse('Failed to upload file locally', HttpStatus.INTERNAL_SERVER_ERROR, error);
-    }
   }
+}
 
   /**
    * Upload file to Supabase
