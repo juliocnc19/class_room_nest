@@ -338,7 +338,7 @@ export class ActivitiesService implements Activitiy {
       const sentActivity = await this.prismaService.activitiesSent.create({
         data: {
           ...activity,
-          document: uploadedFilePath, // Store the file path in the database or wherever it's needed
+          document: activity.document, // Store the file path in the database or wherever it's needed
         },
       });
 
