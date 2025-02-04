@@ -15,6 +15,7 @@ import {
   CreateUserDto,
   DeleteUserDto,
   UpdateUserDto,
+  UpdateUserRoleDto,
 } from './dto/users.dto';
 
 @ApiTags('users')
@@ -40,6 +41,11 @@ export class UsersController {
   @Put()
   async update(@Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(updateUserDto);
+  }
+
+  @Put("/changeRole")
+  async changeRole(@Body() updateUserRoleDto: UpdateUserRoleDto) {
+    return this.usersService.updateUserRole(updateUserRoleDto);
   }
 
   @Post('/authenticate')

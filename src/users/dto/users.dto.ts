@@ -85,3 +85,14 @@ export class DeleteUserDto {
   @IsNotEmpty()
   id: number;
 }
+
+
+export class UpdateUserRoleDto {
+  @IsInt()
+  @IsNotEmpty()
+  userId: number;
+
+  @IsInt()
+  @IsNotEmpty()
+  roleId: number;
+}

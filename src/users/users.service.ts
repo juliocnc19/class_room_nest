@@ -11,6 +11,7 @@ import {
   AuthenticateUserDto,
   CreateUserDto,
   UpdateUserDto,
+  UpdateUserRoleDto,
 } from './dto/users.dto';
 import { errorResponse, successResponse } from 'src/utils/responseHttpUtils';
 
@@ -126,6 +127,35 @@ export class UsersService implements Users {
       return errorResponse('Error al eliminar el usuario', HttpStatus.INTERNAL_SERVER_ERROR, error);
     }
   }
+
+  async updateUserRole(updateUserRoleDto: UpdateUserRoleDto): Promise<any> {
+    const { userId, roleId } = updateUserRoleDto;
+  
+    try {
+      // Verificar si el usuario existe
+      const user = await this.prismaService.user.findUnique({ where: { id: userId } });
+      if (!user) {
+        return errorResponse('El usuario no existe', HttpStatus.NOT_FOUND);
+      }
+  
+      // Verificar si el rol existe
+      const role = await this.prismaService.role.findUnique({ where: { id: roleId } });
+      if (!role) {
+        return errorResponse('El rol especificado no existe', HttpStatus.NOT_FOUND);
+      }
+  
+      // Actualizar el rol del usuario
+      const updatedUser = await this.prismaService.user.update({
+        where: { id: userId },
+        data: { roleId },
+      });
+  
+      return successResponse(updatedUser, 'Rol de usuario actualizado exitosamente');
+    } catch (error) {
+      return errorResponse('Error al actualizar el rol del usuario', HttpStatus.INTERNAL_SERVER_ERROR, error);
+    }
+  }
+  
 
  
 }
