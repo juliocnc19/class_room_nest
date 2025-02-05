@@ -129,7 +129,7 @@ export class UsersService implements Users {
   }
 
   async updateUserRole(updateUserRoleDto: UpdateUserRoleDto): Promise<any> {
-    const { userId, roleId } = updateUserRoleDto;
+    const { id: userId, role: roleId } = updateUserRoleDto;
   
     try {
       // Verificar si el usuario existe

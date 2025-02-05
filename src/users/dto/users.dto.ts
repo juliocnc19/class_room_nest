@@ -90,9 +90,9 @@ export class DeleteUserDto {
 export class UpdateUserRoleDto {
   @IsInt()
   @IsNotEmpty()
-  userId: number;
+  id: number;
 
   @IsInt()
   @IsNotEmpty()
-  roleId: number;
+  role: number;
 }
