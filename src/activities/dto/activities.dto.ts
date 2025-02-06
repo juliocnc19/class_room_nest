@@ -30,6 +30,11 @@ export class CreateActivitiesDto {
   grade: number;
 
   @ApiProperty()
+  @IsInt()
+  @IsNotEmpty()
+  ponderacion: number;
+
+  @ApiProperty()
   @IsString()
   @IsNotEmpty()
   start_date: string;
@@ -88,6 +93,11 @@ export class UpdateActivitiesDto {
   @IsInt()
   @IsOptional()
   grade: number;
+
+  @ApiProperty()
+  @IsInt()
+  @IsNotEmpty()
+  ponderacion: number;
 
   @ApiProperty()
   @IsString()

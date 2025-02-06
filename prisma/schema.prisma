@@ -7,9 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
 
 
 model CourseEnrollment {
@@ -103,8 +100,7 @@ model Activities {
   activities_send ActivitiesSent[]
   Post            Post?
   quizz           Quizz[]
-  Post            Post?
-  ponderacion   Decimal          @default(0.0) // Directly storing the weight
+  ponderacion     Int          @default(0) // Directly storing the weight
 
 }
 
@@ -125,8 +121,6 @@ model ActivitiesSent {
 
 
 
-
-
 model Quizz {
   id          Int         @id @default(autoincrement())
   activity_id Int
@@ -137,20 +131,21 @@ model Quizz {
 
 model Questions {
   id      Int      @id @default(autoincrement())
-  quizzId Int?
+  quizzId Int
   text    String
   answer  Int
   options Option[]
-  Quizz   Quizz?   @relation(fields: [quizzId], references: [id], onDelete: Cascade)
+  Quizz   Quizz   @relation(fields: [quizzId], references: [id], onDelete: Cascade)
 }
 
 model Option {
   id         Int       @id @default(autoincrement())
   text       String
   questionId Int
+  question   Questions @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
   Answer     Answer[]
 }
-
 
 model QuizzSent {
   id          Int      @id @default(autoincrement())
@@ -168,11 +163,9 @@ model Answer {
   quizzSentId Int
   optionId    Int
   option      Option    @relation(fields: [optionId], references: [id], onDelete: Cascade)
-  optionId    Int
+
+  QuizzSent   QuizzSent @relation(fields: [quizzSentId], references: [id], onDelete: Cascade)
 }
-
-
-
 
 
 
@@ -198,7 +191,8 @@ model Post {
   file       String      @default("")
   activity   Activities? @relation(fields: [activityId], references: [id], onDelete: Cascade)
   author     User        @relation(fields: [authorId], references: [id])
-  authorId   Int
+
+  Course Course[]
 }
 
 model ChatRoom {

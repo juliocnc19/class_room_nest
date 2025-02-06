@@ -52,61 +52,171 @@ export class ActivitiesService implements Activitiy {
   }
 }
 
+async create(activity: CreateActivitiesDto) {
+  try {
+    // Get the current sum of ponderacion for the course
+    const existingPonderacion = await this.prismaService.activities.aggregate({
+      _sum: { ponderacion: true },  // Use ponderacion field
+      where: { course_id: activity.course_id },
+    });
 
-  async create(activity: CreateActivitiesDto) {
-    try {
-      const resActivity = await this.prismaService.activities.create({
-        data: activity,
-      });
+    const currentTotal = existingPonderacion._sum.ponderacion || 0;
+    const newTotal = currentTotal + activity.ponderacion; // Use activity.ponderacion
 
-      const course = await this.prismaService.course.findUnique({
-        where: { id: activity.course_id },
-      });
-
-      if (!course) {
-        return errorResponse('Curso no encontrado', HttpStatus.NOT_FOUND);
-      }
-
-      await this.prismaService.post.create({
-        data: {
-          title: activity.title,
-          content: '',
-          courseId: activity.course_id,
-          activityId: resActivity.id,
-          authorId: course.ownerId,
-        },
-      });
-
-      const enrolledUsers = await this.prismaService.courseEnrollment.findMany({
-        where: { courseId: activity.course_id },
-        include: {
-          user: true,
-        },
-      });
-
-      const tokens = enrolledUsers
-        .map((enrollment) => enrollment.user.firebaseToken)
-        .filter((token) => token);
-
-      if (tokens.length > 0) {
-        const notificationTitle = `Nueva actividad en el curso ${course.title}`;
-        const notificationBody = `La actividad "${activity.title}" ha sido creada.`;
-        await this.notificationsService.sendNotification({
-          tokens,
-          title: notificationTitle,
-          body: notificationBody,
-          data: {
-            courseId: activity.course_id.toString(),
-            activityId: resActivity.id.toString(),
-          },
-        });
-      }
-
-      return successResponse(resActivity, 'Actividad creada exitosamente');
-    } catch (error) {
-      return errorResponse('Error al crear la actividad', HttpStatus.INTERNAL_SERVER_ERROR, error);
+    // Check if the new total exceeds 100
+    if (newTotal > 100) {
+      return errorResponse(
+        `La suma total de ponderación para este curso no puede exceder 100. Actualmente: ${currentTotal}, Intentado: ${activity.ponderacion}`,
+        HttpStatus.BAD_REQUEST
+      );
     }
+
+    // Proceed with activity creation
+    const resActivity = await this.prismaService.activities.create({
+      data: activity,
+    });
+
+    const course = await this.prismaService.course.findUnique({
+      where: { id: activity.course_id },
+    });
+
+    if (!course) {
+      return errorResponse('Curso no encontrado', HttpStatus.NOT_FOUND);
+    }
+
+    await this.prismaService.post.create({
+      data: {
+        title: activity.title,
+        content: '',
+        courseId: activity.course_id,
+        activityId: resActivity.id,
+        authorId: course.ownerId,
+      },
+    });
+
+    const enrolledUsers = await this.prismaService.courseEnrollment.findMany({
+      where: { courseId: activity.course_id },
+      include: { user: true },
+    });
+
+    const tokens = enrolledUsers
+      .map((enrollment) => enrollment.user.firebaseToken)
+      .filter((token) => token);
+
+    if (tokens.length > 0) {
+      const notificationTitle = `Nueva actividad en el curso ${course.title}`;
+      const notificationBody = `La actividad "${activity.title}" ha sido creada.`;
+      await this.notificationsService.sendNotification({
+        tokens,
+        title: notificationTitle,
+        body: notificationBody,
+        data: {
+          courseId: activity.course_id.toString(),
+          activityId: resActivity.id.toString(),
+        },
+      });
+    }
+
+    return successResponse(resActivity, 'Actividad creada exitosamente');
+  } catch (error) {
+    return errorResponse('Error al crear la actividad', HttpStatus.INTERNAL_SERVER_ERROR, error);
   }
+}
+
+async update(activities: UpdateActivitiesDto) {
+  try {
+    const existingActivity = await this.prismaService.activities.findUnique({
+      where: { id: activities.id },
+    });
+
+    if (!existingActivity) {
+      return errorResponse('Actividad no encontrada', HttpStatus.NOT_FOUND);
+    }
+
+    // Get the current sum of ponderacion excluding the current activity
+    const existingPonderacion = await this.prismaService.activities.aggregate({
+      _sum: { ponderacion: true },  // Use ponderacion field
+      where: {
+        course_id: existingActivity.course_id,
+        id: { not: activities.id }, // Exclude the current activity
+      },
+    });
+
+    const currentTotal = existingPonderacion._sum.ponderacion || 0;
+    const newTotal = currentTotal + (activities.ponderacion ?? existingActivity.ponderacion);
+
+    if (newTotal > 100) {
+      return errorResponse(
+        `La suma total de ponderación para este curso no puede exceder 100. Actualmente: ${currentTotal}, Intentado: ${activities.ponderacion ?? existingActivity.ponderacion}`,
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    const updatedActivity = await this.prismaService.activities.update({
+      where: { id: activities.id },
+      data: activities,
+    });
+
+    return successResponse(updatedActivity, 'Actividad actualizada exitosamente');
+  } catch (error) {
+    return errorResponse('Error al actualizar la actividad', HttpStatus.INTERNAL_SERVER_ERROR, error);
+  }
+}
+
+  // async create(activity: CreateActivitiesDto) {
+  //   try {
+  //     const resActivity = await this.prismaService.activities.create({
+  //       data: activity,
+  //     });
+
+  //     const course = await this.prismaService.course.findUnique({
+  //       where: { id: activity.course_id },
+  //     });
+
+  //     if (!course) {
+  //       return errorResponse('Curso no encontrado', HttpStatus.NOT_FOUND);
+  //     }
+
+  //     await this.prismaService.post.create({
+  //       data: {
+  //         title: activity.title,
+  //         content: '',
+  //         courseId: activity.course_id,
+  //         activityId: resActivity.id,
+  //         authorId: course.ownerId,
+  //       },
+  //     });
+
+  //     const enrolledUsers = await this.prismaService.courseEnrollment.findMany({
+  //       where: { courseId: activity.course_id },
+  //       include: {
+  //         user: true,
+  //       },
+  //     });
+
+  //     const tokens = enrolledUsers
+  //       .map((enrollment) => enrollment.user.firebaseToken)
+  //       .filter((token) => token);
+
+  //     if (tokens.length > 0) {
+  //       const notificationTitle = `Nueva actividad en el curso ${course.title}`;
+  //       const notificationBody = `La actividad "${activity.title}" ha sido creada.`;
+  //       await this.notificationsService.sendNotification({
+  //         tokens,
+  //         title: notificationTitle,
+  //         body: notificationBody,
+  //         data: {
+  //           courseId: activity.course_id.toString(),
+  //           activityId: resActivity.id.toString(),
+  //         },
+  //       });
+  //     }
+
+  //     return successResponse(resActivity, 'Actividad creada exitosamente');
+  //   } catch (error) {
+  //     return errorResponse('Error al crear la actividad', HttpStatus.INTERNAL_SERVER_ERROR, error);
+  //   }
+  // }
 
   async findOne(id: number) {
     try {
@@ -224,18 +334,18 @@ export class ActivitiesService implements Activitiy {
   //   }
   // }
 
-  async update(activities: UpdateActivitiesDto) {
-    try {
-      const updatedActivity = await this.prismaService.activities.update({
-        where: { id: activities.id },
-        data: activities,
-      });
+  // async update(activities: UpdateActivitiesDto) {
+  //   try {
+  //     const updatedActivity = await this.prismaService.activities.update({
+  //       where: { id: activities.id },
+  //       data: activities,
+  //     });
 
-      return successResponse(updatedActivity, 'Actividad actualizada exitosamente');
-    } catch (error) {
-      return errorResponse('Error al actualizar la actividad', HttpStatus.INTERNAL_SERVER_ERROR, error);
-    }
-  }
+  //     return successResponse(updatedActivity, 'Actividad actualizada exitosamente');
+  //   } catch (error) {
+  //     return errorResponse('Error al actualizar la actividad', HttpStatus.INTERNAL_SERVER_ERROR, error);
+  //   }
+  // }
 
   async myActivities(idUser: number) {
     try {
