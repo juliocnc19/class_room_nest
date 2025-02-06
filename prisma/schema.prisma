@@ -12,15 +12,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// model CourseEnrollment {
-//   id       Int    @id @default(autoincrement())
-//   userId   Int
-//   courseId Int
-//   user     User   @relation(fields: [userId], references: [id])
-//   course   Course @relation(fields: [courseId], references: [id])
-
-//   @@unique([userId, courseId])
-// }
 
 model CourseEnrollment {
   id       Int    @id @default(autoincrement())
@@ -120,27 +111,12 @@ model User {
   activities_send ActivitiesSent[]
   quizz           Quizz[]
   Post            Post?
+  ponderacion   Decimal          @default(0.0) // Directly storing the weight
+
 }
 
 
-// model Activities {
-//   id              Int              @id @default(autoincrement())
-//   course          Course           @relation(fields: [course_id], references: [id])
-//   course_id       Int
-//   title           String
-//   description     String
-//   grade           Decimal
-//   start_date      String
-//   end_date        String
-//   email           String
-//   digital         Boolean          @default(true)
-//   isQuizz         Boolean          @default(false)
-//   status          Status           @relation(fields: [status_id], references: [id])
-//   status_id       Int
-//   activities_send ActivitiesSent[]
-//   quizz           Quizz[]
-//   Post            Post?
-// }
+
 
 model ActivitiesSent {
   id          Int        @id @default(autoincrement())
@@ -153,6 +129,7 @@ model ActivitiesSent {
   grade       Decimal    @default(0)
   create_date DateTime   @default(now())
 }
+
 
 
 
@@ -183,12 +160,6 @@ model Option {
   Answer     Answer[]
 }
 
-// model QuizzSent {
-//   id          Int      @id @default(autoincrement())
-//   quizz       Quizz    @relation(fields: [quizzId], references: [id], onDelete: Cascade)
-//   quizzId     Int
-//   answer      Answer[]
-// }
 
 model QuizzSent {
   id          Int      @id @default(autoincrement())
@@ -218,74 +189,11 @@ model Answer {
 
 
 
-
-
-// model Quizz {
-//   id          Int         @id @default(autoincrement())
-//   activity    Activities  @relation(fields: [activity_id], references: [id])
-//   activity_id Int
-//   question    Questions[]
-//   sent        QuizzSent[]
-// }
-
-// model Questions {
-//   id      Int      @id @default(autoincrement())
-//   Quizz   Quizz?   @relation(fields: [quizzId], references: [id])
-//   quizzId Int?
-//   text    String
-//   options Option[]
-//   answer  Int
-// }
-
-// model Option {
-//   id         Int       @id @default(autoincrement())
-//   text       String
-//   question   Questions @relation(fields: [questionId], references: [id])
-//   questionId Int
-//   Answer     Answer[]
-// }
-
-// model QuizzSent {
-//   id          Int      @id @default(autoincrement())
-//   quizz       Quizz    @relation(fields: [quizzId], references: [id])
-//   quizzId     Int
-//   user        User     @relation(fields: [userId], references: [id])
-//   userId      Int
-//   grade       Decimal  @default(0)
-//   create_date DateTime @default(now())
-//   answer      Answer[]
-// }
-
-// model Answer {
-//   id          Int       @id @default(autoincrement())
-//   QuizzSent   QuizzSent @relation(fields: [quizzSentId], references: [id])
-//   quizzSentId Int
-//   option      Option    @relation(fields: [optionId], references: [id])
-//   optionId    Int
-// }
-
-
-
 model Status {
   id         Int          @id @default(autoincrement())
   status     String       @unique
   activities Activities[]
 }
-
-// model Post {
-//   id         Int         @id @default(autoincrement())
-//   title      String      @default("")
-//   content    String      @default("")
-//   createdAt  DateTime    @default(now())
-//   course     Course      @relation(fields: [courseId], references: [id])
-//   courseId   Int
-//   file       String      @default("")
-//   activity   Activities? @relation(fields: [activityId], references: [id])
-//   activityId Int?        @unique // Clave foránea opcional, permite que algunos posts no tengan actividad asociada
-//   author     User        @relation(fields: [authorId], references: [id])
-//   authorId   Int
-// }
-
 
 
 model Post {
@@ -302,16 +210,6 @@ model Post {
   authorId   Int
 }
 
-// model ChatRoom {
-//   id          Int             @id @default(autoincrement())
-//   name        String?
-//   isGroup     Boolean          @default(false)
-//   createdAt   DateTime         @default(now())
-//   users       ChatRoomUser[]
-//   messages    Message[]
-//   course      Course?          @relation(fields: [courseId], references: [id])
-//   courseId    Int?
-// }
 model ChatRoom {
   id          Int             @id @default(autoincrement())
   name        String?
