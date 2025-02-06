@@ -1,33 +1,18 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+generator client {
+  provider = "prisma-client-js"
+}
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
-// model CourseEnrollment {
-//   id       Int    @id @default(autoincrement())
-//   userId   Int
-//   courseId Int
-//   user     User   @relation(fields: [userId], references: [id])
-//   course   Course @relation(fields: [courseId], references: [id])
-
-//   @@unique([userId, courseId])
-// }
-
 model CourseEnrollment {
   id       Int    @id @default(autoincrement())
   userId   Int
   courseId Int
-  user     User   @relation(fields: [userId], references: [id])
   course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user     User   @relation(fields: [userId], references: [id])
 
   @@unique([userId, courseId])
 }
@@ -42,28 +27,26 @@ model Course {
   id          Int                @id @default(autoincrement())
   title       String
   description String
-  owner       User               @relation(fields: [ownerId], references: [id])
   ownerId     Int
   owner_name  String
   section     String
   subject     String
-  verified    Boolean            @default(false)
-  area        Area               @relation(fields: [areaId], references: [id])
   areaId      Int
-  users       CourseEnrollment[]
   token       String             @unique
+  verified    Boolean            @default(false)
   activities  Activities[]
+  ChatRoom    ChatRoom[]
+  area        Area               @relation(fields: [areaId], references: [id])
+  owner       User               @relation(fields: [ownerId], references: [id])
+  users       CourseEnrollment[]
   Post        Post[]
-
-  ChatRoom ChatRoom[]
 }
 
 model Role {
-  id    Int    @id @default(autoincrement())
-  role  String @unique
-  users User[]
-
+  id           Int            @id @default(autoincrement())
+  role         String         @unique
   ChatRoomUser ChatRoomUser[]
+  users        User[]
 }
 
 model Gender {
@@ -77,35 +60,29 @@ model User {
   email           String             @unique
   password        String
   create_date     DateTime           @default(now())
-  firebaseToken   String?           
   user_name       String             @unique
-  gender          Gender             @relation(fields: [genderId], references: [id])
   genderId        Int
   name            String
   last_name       String
   phone           String
-  courses         CourseEnrollment[]
-  course_owner    Course[]
-  activities_sent ActivitiesSent[]
-  QuizzSent       QuizzSent[]
-  Post            Post[]
-  Role            Role               @relation(fields: [roleId], references: [id])
   roleId          Int
-
-  Message Message[]
-
-  ChatRoomUser ChatRoomUser[]
-
-  UserStatus UserStatus[]
-
-  BlockedUser BlockedUser[] @relation("blockedUser")
-
-  BlockedBy BlockedUser[] @relation("blockedBy")
+  firebaseToken   String?
+  activities_sent ActivitiesSent[]
+  BlockedUser     BlockedUser[]      @relation("blockedUser")
+  BlockedBy       BlockedUser[]      @relation("blockedBy")
+  ChatRoomUser    ChatRoomUser[]
+  course_owner    Course[]
+  courses         CourseEnrollment[]
+  Message         Message[]
+  Post            Post[]
+  QuizzSent       QuizzSent[]
+  gender          Gender             @relation(fields: [genderId], references: [id])
+  Role            Role               @relation(fields: [roleId], references: [id])
+  UserStatus      UserStatus[]
 }
 
-  model Activities {
+model Activities {
   id              Int              @id @default(autoincrement())
-  course    Course  @relation(fields: [course_id], references: [id], onDelete: Cascade)
   course_id       Int
   title           String
   description     String
@@ -114,157 +91,70 @@ model User {
   end_date        String
   email           String
   digital         Boolean          @default(true)
-  isQuizz         Boolean          @default(false)
-  status          Status           @relation(fields: [status_id], references: [id])
   status_id       Int
+  isQuizz         Boolean          @default(false)
+  course          Course           @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  status          Status           @relation(fields: [status_id], references: [id])
   activities_send ActivitiesSent[]
-  quizz           Quizz[]
   Post            Post?
+  quizz           Quizz[]
 }
-
-
-// model Activities {
-//   id              Int              @id @default(autoincrement())
-//   course          Course           @relation(fields: [course_id], references: [id])
-//   course_id       Int
-//   title           String
-//   description     String
-//   grade           Decimal
-//   start_date      String
-//   end_date        String
-//   email           String
-//   digital         Boolean          @default(true)
-//   isQuizz         Boolean          @default(false)
-//   status          Status           @relation(fields: [status_id], references: [id])
-//   status_id       Int
-//   activities_send ActivitiesSent[]
-//   quizz           Quizz[]
-//   Post            Post?
-// }
 
 model ActivitiesSent {
   id          Int        @id @default(autoincrement())
-  activity    Activities @relation(fields: [activity_id], references: [id])
   activity_id Int
-  document    String?    @default("")
-  user        User       @relation(fields: [user_id], references: [id])
   user_id     Int
-  message     String?
-  grade       Decimal    @default(0)
   create_date DateTime   @default(now())
+  document    String?    @default("")
+  grade       Decimal    @default(0)
+  message     String?
+  activity    Activities @relation(fields: [activity_id], references: [id])
+  user        User       @relation(fields: [user_id], references: [id])
 }
-
-
-
 
 model Quizz {
   id          Int         @id @default(autoincrement())
-  activity    Activities  @relation(fields: [activity_id], references: [id], onDelete: Cascade)
   activity_id Int
   question    Questions[]
+  activity    Activities  @relation(fields: [activity_id], references: [id], onDelete: Cascade)
   sent        QuizzSent[]
 }
 
 model Questions {
   id      Int      @id @default(autoincrement())
-  Quizz   Quizz?   @relation(fields: [quizzId], references: [id], onDelete: Cascade)
-  text       String
-
   quizzId Int?
-  options Option[]
+  text    String
   answer  Int
+  options Option[]
+  Quizz   Quizz?   @relation(fields: [quizzId], references: [id], onDelete: Cascade)
 }
 
 model Option {
   id         Int       @id @default(autoincrement())
   text       String
-  question   Questions @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId Int
   Answer     Answer[]
+  question   Questions @relation(fields: [questionId], references: [id], onDelete: Cascade)
 }
-
-// model QuizzSent {
-//   id          Int      @id @default(autoincrement())
-//   quizz       Quizz    @relation(fields: [quizzId], references: [id], onDelete: Cascade)
-//   quizzId     Int
-//   answer      Answer[]
-// }
 
 model QuizzSent {
   id          Int      @id @default(autoincrement())
-  quizz       Quizz    @relation(fields: [quizzId], references: [id], onDelete: Cascade)
   quizzId     Int
-  user        User     @relation(fields: [userId], references: [id])
   userId      Int
-  grade       Decimal  @default(0)
   create_date DateTime @default(now())
+  grade       Decimal  @default(0)
   answer      Answer[]
+  quizz       Quizz    @relation(fields: [quizzId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id])
 }
 
 model Answer {
   id          Int       @id @default(autoincrement())
-  QuizzSent   QuizzSent @relation(fields: [quizzSentId], references: [id], onDelete: Cascade)
   quizzSentId Int
-  option      Option    @relation(fields: [optionId], references: [id], onDelete: Cascade)
   optionId    Int
+  option      Option    @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  QuizzSent   QuizzSent @relation(fields: [quizzSentId], references: [id], onDelete: Cascade)
 }
-
-
-
-
-
-
-
-
-
-
-
-
-// model Quizz {
-//   id          Int         @id @default(autoincrement())
-//   activity    Activities  @relation(fields: [activity_id], references: [id])
-//   activity_id Int
-//   question    Questions[]
-//   sent        QuizzSent[]
-// }
-
-// model Questions {
-//   id      Int      @id @default(autoincrement())
-//   Quizz   Quizz?   @relation(fields: [quizzId], references: [id])
-//   quizzId Int?
-//   text    String
-//   options Option[]
-//   answer  Int
-// }
-
-// model Option {
-//   id         Int       @id @default(autoincrement())
-//   text       String
-//   question   Questions @relation(fields: [questionId], references: [id])
-//   questionId Int
-//   Answer     Answer[]
-// }
-
-// model QuizzSent {
-//   id          Int      @id @default(autoincrement())
-//   quizz       Quizz    @relation(fields: [quizzId], references: [id])
-//   quizzId     Int
-//   user        User     @relation(fields: [userId], references: [id])
-//   userId      Int
-//   grade       Decimal  @default(0)
-//   create_date DateTime @default(now())
-//   answer      Answer[]
-// }
-
-// model Answer {
-//   id          Int       @id @default(autoincrement())
-//   QuizzSent   QuizzSent @relation(fields: [quizzSentId], references: [id])
-//   quizzSentId Int
-//   option      Option    @relation(fields: [optionId], references: [id])
-//   optionId    Int
-// }
-
-
 
 model Status {
   id         Int          @id @default(autoincrement())
@@ -272,91 +162,73 @@ model Status {
   activities Activities[]
 }
 
-// model Post {
-//   id         Int         @id @default(autoincrement())
-//   title      String      @default("")
-//   content    String      @default("")
-//   createdAt  DateTime    @default(now())
-//   course     Course      @relation(fields: [courseId], references: [id])
-//   courseId   Int
-//   file       String      @default("")
-//   activity   Activities? @relation(fields: [activityId], references: [id])
-//   activityId Int?        @unique // Clave foránea opcional, permite que algunos posts no tengan actividad asociada
-//   author     User        @relation(fields: [authorId], references: [id])
-//   authorId   Int
-// }
-
-
-
 model Post {
   id         Int         @id @default(autoincrement())
   title      String      @default("")
   content    String      @default("")
   createdAt  DateTime    @default(now())
-  course     Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
   courseId   Int
+  activityId Int?        @unique
+  authorId   Int
   file       String      @default("")
   activity   Activities? @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  activityId Int?        @unique
   author     User        @relation(fields: [authorId], references: [id])
-  authorId   Int
+  course     Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
 }
 
-// model ChatRoom {
-//   id          Int             @id @default(autoincrement())
-//   name        String?
-//   isGroup     Boolean          @default(false)
-//   createdAt   DateTime         @default(now())
-//   users       ChatRoomUser[]
-//   messages    Message[]
-//   course      Course?          @relation(fields: [courseId], references: [id])
-//   courseId    Int?
-// }
 model ChatRoom {
-  id          Int             @id @default(autoincrement())
-  name        String?
-  isGroup     Boolean          @default(false)
-  createdAt   DateTime         @default(now())
-  users       ChatRoomUser[]
-  messages    Message[]
-  course    Course? @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  courseId    Int?
+  id        Int            @id @default(autoincrement())
+  name      String?
+  isGroup   Boolean        @default(false)
+  createdAt DateTime       @default(now())
+  courseId  Int?
+  course    Course?        @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  users     ChatRoomUser[]
+  messages  Message[]
 }
-
 
 model ChatRoomUser {
-  id          Int        @id @default(autoincrement())
-  user        User       @relation(fields: [userId], references: [id])
-  userId      Int
-  chatRoom    ChatRoom   @relation(fields: [chatRoomId], references: [id])
-  chatRoomId  Int
-  role        Role       @relation(fields: [roleId], references: [id])
-  roleId      Int
-  isActive    Boolean    @default(true)
-  lastSeen    DateTime   @default(now())
-  isTyping    Boolean    @default(false)
-  isBlocked   Boolean    @default(false)
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  chatRoomId Int
+  roleId     Int
+  isActive   Boolean  @default(true)
+  lastSeen   DateTime @default(now())
+  isTyping   Boolean  @default(false)
+  isBlocked  Boolean  @default(false)
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
+  role       Role     @relation(fields: [roleId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
 }
 
 model Message {
-  id          Int        @id @default(autoincrement())
+  id          Int         @id @default(autoincrement())
   content     String?
-  sender      User       @relation(fields: [senderId], references: [id])
   senderId    Int
-  chatRoom    ChatRoom   @relation(fields: [chatRoomId], references: [id])
   chatRoomId  Int
-  sentAt      DateTime   @default(now())
-  isRead      Boolean    @default(false)
+  sentAt      DateTime    @default(now())
+  isRead      Boolean     @default(false)
   messageType MessageType @default(TEXT)
   fileUrl     String?
+  chatRoom    ChatRoom    @relation(fields: [chatRoomId], references: [id])
+  sender      User        @relation(fields: [senderId], references: [id])
 }
 
 model UserStatus {
-  id          Int        @id @default(autoincrement())
-  user        User       @relation(fields: [userId], references: [id])
-  userId      Int
-  isOnline    Boolean    @default(false)
-  lastActive  DateTime   @default(now())
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  isOnline   Boolean  @default(false)
+  lastActive DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model BlockedUser {
+  id        Int      @id @default(autoincrement())
+  blockerId Int
+  blockedId Int
+  blockedAt DateTime @default(now())
+  blocked   User     @relation("blockedUser", fields: [blockedId], references: [id])
+  blocker   User     @relation("blockedBy", fields: [blockerId], references: [id])
 }
 
 enum MessageType {
@@ -364,13 +236,4 @@ enum MessageType {
   IMAGE
   VIDEO
   FILE
-}
-
-model BlockedUser {
-  id          Int        @id @default(autoincrement())
-  blocker     User       @relation("blockedBy", fields: [blockerId], references: [id])
-  blockerId   Int
-  blocked     User       @relation("blockedUser", fields: [blockedId], references: [id])
-  blockedId   Int
-  blockedAt   DateTime   @default(now())
 }
