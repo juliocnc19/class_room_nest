@@ -125,6 +125,7 @@ export class CoursesService implements Courses {
     }
   
     async findUserOfCourse(id: number) {
+      console.log("entro")
       try {
         const course = await this.prismaService.course.findUnique({ where: { id } });
         if (!course) {
@@ -233,19 +234,21 @@ export class CoursesService implements Courses {
         return errorResponse('Error al obtener los cursos', HttpStatus.INTERNAL_SERVER_ERROR, error);
       }
     }
-  
-    async findCourseOfUser(userId: number) {
-      try {
-        const courses = await this.prismaService.course.findMany({
-          where: {
-            OR: [{ ownerId: userId }, { users: { some: { userId } } }],
-          },
-        });
-        return successResponse(courses, 'Cursos del usuario obtenidos exitosamente');
-      } catch (error) {
-        return errorResponse('Error al obtener los cursos del usuario', HttpStatus.INTERNAL_SERVER_ERROR, error);
-      }
+  async findCourseOfUser(userId: number) {
+    console.log(`Finding courses for user with ID: ${userId}`);
+    try {
+      const courses = await this.prismaService.course.findMany({
+        where: {
+          OR: [{ ownerId: userId }, { users: { some: { userId } } }],
+        },
+      });
+      console.log(`Courses found: ${JSON.stringify(courses)}`);
+      return successResponse(courses, 'Cursos del usuario obtenidos exitosamente');
+    } catch (error) {
+      console.error(`Error finding courses for user with ID: ${userId}`, error);
+      return errorResponse('Error al obtener los cursos del usuario', HttpStatus.INTERNAL_SERVER_ERROR, error);
     }
+  }
 
   // async create(createCourseDto: CreateCourseDto): Promise<Course> {
   //   try {
