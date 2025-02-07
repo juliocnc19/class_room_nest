@@ -71,6 +71,11 @@ export class CreateQuizzDto2 {
   @IsNotEmpty()
   grade: number;
 
+  @ApiProperty({ description: 'Ponderacion for the quizz', example: '10' })
+  @IsInt()
+  @IsNotEmpty()
+  ponderacion: number;
+
   @ApiProperty({ description: 'Start date for the activity', example: '2024-12-01' })
   @IsString()
   @IsNotEmpty()

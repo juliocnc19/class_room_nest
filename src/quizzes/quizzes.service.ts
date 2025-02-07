@@ -54,6 +54,7 @@ export class QuizzesService {
         statusId,
         courseId,
         questions,
+        ponderacion,
         email,
       } = data;
   
@@ -65,6 +66,22 @@ export class QuizzesService {
       if (!course) {
         return errorResponse('El curso no existe', HttpStatus.NOT_FOUND);
       }
+// Get the current sum of ponderacion for the course
+const existingPonderacion = await this.prisma.activities.aggregate({
+  _sum: { ponderacion: true },  // Use ponderacion field
+  where: { course_id: courseId },
+});
+
+const currentTotal = existingPonderacion._sum.ponderacion || 0;
+const newTotal = currentTotal + ponderacion; // Use activity.ponderacion
+
+// Check if the new total exceeds 100
+if (newTotal > 100) {
+  return errorResponse(
+    `La suma total de ponderación para este curso no puede exceder 100. Actualmente: ${currentTotal}, Intentado: ${ponderacion}`,
+    HttpStatus.BAD_REQUEST
+  );
+}
   
       // Create the associated activity
       const activity = await this.prisma.activities.create({
@@ -74,6 +91,7 @@ export class QuizzesService {
           grade,
           start_date: startDate,
           end_date: endDate,
+          ponderacion,
           email,
           digital,
           isQuizz: true,
@@ -327,6 +345,11 @@ export class QuizzesService {
       }
   
       console.log('User exists:', userExists);
+
+      console.log('quizz data:', quizzId);
+      console.log('quizz data:', userId);
+
+
   
       // Validate that the user has not already submitted this quiz
       const existingSubmission = await this.prisma.quizzSent.findFirst({
