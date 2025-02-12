@@ -19,13 +19,20 @@ export function errorResponse<T>(message: string, code: number, data: T = null):
     code, // Set HTTP status code properly
   );
 
-  // return {
-  //   code,
-  //   message,
-  //   data,
-  // };
 }
 
+//This is the correct way
+
+// export function errorResponse<T>(message: string, code: number, data: T = null): never {
+//   throw new HttpException(
+//     {
+//       code,
+//       message,
+//       data,
+//     },
+//     code // Ensure correct HTTP status code is set
+//   );
+// }
 
 
   export interface ApiResponse<T> {

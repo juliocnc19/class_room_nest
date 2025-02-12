@@ -1,9 +1,13 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, StreamableFile } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { createReadStream, existsSync, mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { errorResponse, successResponse } from 'src/utils/responseHttpUtils';
+import * as ExcelJS from 'exceljs';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { Response } from 'express';
+
 
 @Injectable()
 export class CloudService {
@@ -12,7 +16,12 @@ export class CloudService {
   private readonly uploadFolder = 'uploads'; // Local folder for storing files
 
 
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    private readonly prismaService: PrismaService,
+
+
+  ) {
     const supabaseUrl = this.configService.get<string>('SUPABASE_URL');
     const supabaseKey = this.configService.get<string>('SUPABASE_KEY');
 
@@ -142,72 +151,49 @@ export class CloudService {
       return errorResponse('Failed to upload file to Supabase', HttpStatus.INTERNAL_SERVER_ERROR, error);
     }
   }
+
+
+  async generateExcel(model: string, res: Response) {
+    try {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet(model.toUpperCase());
+
+      // Validate if the model exists in Prisma
+      if (!(model in this.prismaService)) {
+        return errorResponse(`Modelo '${model}' no es válido`, HttpStatus.BAD_REQUEST);
+      }
+
+      // Fetch data dynamically
+      const data = await this.prismaService[model].findMany();
+
+      if (!data.length) {
+        return errorResponse(`No se encontraron registros para '${model}'`, HttpStatus.NOT_FOUND);
+      }
+
+      // Extract headers dynamically
+      const headers = Object.keys(data[0]);
+      worksheet.addRow(headers);
+
+      // Add data rows
+      data.forEach(item => {
+        worksheet.addRow(headers.map(header => item[header]));
+      });
+
+      // Save the file temporarily
+      const filePath = `./temp/${model}-export.xlsx`;
+      await workbook.xlsx.writeFile(filePath);
+
+      // Stream the file to the client
+      const fileStream = createReadStream(filePath);
+      res.set('Content-Disposition', `attachment; filename=${model}-export.xlsx`);
+      res.set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+
+      return res.send(successResponse({}, `Archivo Excel generado para '${model}'`));
+    } catch (error) {
+      return errorResponse(`Error al generar Excel para '${model}'`, HttpStatus.INTERNAL_SERVER_ERROR, error);
+    }
+  }
   }
 
-  // async uploadFile(
-  //   file: Express.Multer.File,
-  // ): Promise<{ id: string; path: string; fullPath: string }> {
-  //   try {
-  //     const filePath = `uploads/${file.originalname}`;
-
-  //     const { data: existingFile, error: checkError } =
-  //       await this.supabase.storage
-  //         .from(this.bucketName)
-  //         .list('uploads', { search: file.originalname });
-
-  //     if (checkError) {
-  //       throw new HttpException(
-  //         {
-  //           code: HttpStatus.INTERNAL_SERVER_ERROR,
-  //           message: checkError.message,
-  //           data: {},
-  //         },
-  //         HttpStatus.INTERNAL_SERVER_ERROR,
-  //       );
-  //     }
-
-  //     if (existingFile && existingFile.length > 0) {
-  //       return {
-  //         id: existingFile[0].id,
-  //         path: `uploads/${existingFile[0].name}`,
-  //         fullPath: `${this.bucketName}/${filePath}`,
-  //       };
-  //     }
-
-  //     // Si no existe, subir el archivo
-  //     const { data, error } = await this.supabase.storage
-  //       .from(this.bucketName)
-  //       .upload(filePath, file.buffer, {
-  //         contentType: file.mimetype,
-  //       });
-
-  //     if (error) {
-  //       throw new HttpException(
-  //         {
-  //           code: HttpStatus.INTERNAL_SERVER_ERROR,
-  //           message: error.message,
-  //           data: {},
-  //         },
-  //         HttpStatus.INTERNAL_SERVER_ERROR,
-  //       );
-  //     }
-
-  //     return {
-  //       id: data.id,
-  //       path: data.path,
-  //       fullPath: `${this.bucketName}/${data.path}`,
-  //     };
-  //   } catch (e) {
-  //     const error = e as Error;
-  //     console.log(error);
-  //     throw new HttpException(
-  //       {
-  //         code: HttpStatus.INTERNAL_SERVER_ERROR,
-  //         message: error.message,
-  //         data: {},
-  //       },
-  //       HttpStatus.INTERNAL_SERVER_ERROR,
-  //     );
-  //   }
-  // }
+  
 
