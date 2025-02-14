@@ -7,19 +7,28 @@ export function successResponse<T>(data: T, message = 'Success'): ApiResponse<T>
     data,
   };
 }
-  
 export function errorResponse<T>(message: string, code: number, data: T = null): ApiResponse<T> {
   
-  throw new HttpException(
-    {
-      code,
-      message,
-      data,
-    },
-    code, // Set HTTP status code properly
-  );
+  return {
+    code,
+    message,
+    data,
+  };
+
 
 }
+// export function errorResponse<T>(message: string, code: number, data: T = null): ApiResponse<T> {
+  
+//   throw new HttpException(
+//     {
+//       code,
+//       message,
+//       data,
+//     },
+//     code, // Set HTTP status code properly
+//   );
+
+// }
 
 //This is the correct way
 
